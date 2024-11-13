@@ -2,7 +2,7 @@ import { PrismaAdapter } from "@next-auth/prisma-adapter";
 import NextAuth, { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import db from "@/shared/providers/dbProvider"; 
-\\simport bcrypt from "bcrypt";
+import bcrypt from "bcrypt";
 
 const authOptions: NextAuthOptions = {
 	adapter: PrismaAdapter(db),
