@@ -3,7 +3,7 @@ import Navbar from "@/shared/components/general-component/layout-component/Navba
 import { Providers } from "@/shared/providers/providers";
 import { Box, Flex } from "@chakra-ui/react";
 import type { Metadata } from "next";
-//aqil
+
 export const metadata: Metadata = {
     title: "DESAP - Account Management",
 };
