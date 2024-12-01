@@ -1,15 +1,30 @@
 'use client'; 
 
-import React from 'react';
+import React, { useState} from 'react';
 
 const RegistrationPage = () => {
+    const [ formData, setFormData ] = useState({
+        username: '',
+        email: '',
+        password: '',
+    });
+
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const { name, value } = e.target;
+        setFormData({ ...formData, [name]: value });
+    };
+
+    const handleSubmit = (e: React.FormEvent) => {
+        e.preventDefault();
+        console.log('Form Data: ', formData);
+    };
   
   return (
     <div style={{maxWidth: '400px', margin: 'auto', padding: '20px'}}>
 
       <h1>Register</h1>
 
-      <form>
+      <form onSubmit={handleSubmit}>
         <div>
             <label htmlFor="username">Username</label>
             <input
@@ -17,6 +32,8 @@ const RegistrationPage = () => {
                 id="username"
                 name="username"
                 placeholder="Enter your username"
+                value={formData.username}
+                onChange={handleChange}
                 style={{ display: 'block', width: '100%', margin: '10px 0'}}
         />
         </div>
@@ -27,6 +44,8 @@ const RegistrationPage = () => {
                 id="email"
                 name="email"
                 placeholder="Enter your email"
+                value={formData.email}
+                onChange={handleChange}
                 style={{ display: 'block', width: '100%', margin: '10px 0'}}
             />
         </div>
@@ -37,6 +56,8 @@ const RegistrationPage = () => {
                 id="password"
                 name="password"
                 placeholder="Enter your password"
+                value={formData.password}
+                onChange={handleChange}
                 style={{ display: 'block', width: '100%', margin: '10px 0'}}
             />
         </div>
