@@ -14,13 +14,32 @@ const RegistrationPage = () => {
         setFormData({ ...formData, [name]: value });
     };
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!formData.username || !formData.email || !formData.password){
             alert('All fields are required!');
             return;
         }
-        console.log('Form Data: ', formData);
+
+        try {
+            const response = await fetch('/api/register', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(formData),
+            });
+
+            if (!response.ok) {
+                alert('Failed to register!');
+                return;
+            }
+
+            const data = await response.json();
+            console.log('Registration Successful:', data);
+            alert('Registration Successful!');
+        } catch(error){
+            console.error('Error:', error);
+            alert('Something went wrong!');
+        }
     };
   
   return (
