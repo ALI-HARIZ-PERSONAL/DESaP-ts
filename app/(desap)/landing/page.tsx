@@ -74,7 +74,7 @@ export default function LandingPage() {
                         <>
                             <Button
                                 as={"a"}
-                                href="/account/create"
+                                href="/register"
                                 rounded={"full"}
                                 px={6}
                                 colorScheme={"green"}
