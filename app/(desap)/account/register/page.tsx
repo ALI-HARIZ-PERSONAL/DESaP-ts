@@ -16,6 +16,10 @@ const RegistrationPage = () => {
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
+        if (!formData.username || !formData.email || !formData.password){
+            alert('All fields are required!');
+            return;
+        }
         console.log('Form Data: ', formData);
     };
   
