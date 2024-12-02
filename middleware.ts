@@ -42,7 +42,7 @@ const registerRoute = "/register";
 const forbiddenRoute = "/forbidden";
 
 export async function middleware(req: NextRequest) {
-	const url = req.nextUrl.clone();
+	/*const url = req.nextUrl.clone();
 
 	if (
 		url.pathname.startsWith("/_next") ||
@@ -98,7 +98,7 @@ export async function middleware(req: NextRequest) {
 		return NextResponse.redirect(url);
 	}
 
-	return NextResponse.next();
+	return NextResponse.next(); */
 }
 
 export const config = {

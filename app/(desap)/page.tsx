@@ -33,7 +33,7 @@ export default function MainPage() {
                 >
                     <Button
                         as={"a"}
-                        href="/account/create"
+                        href="/account/register"
                         colorScheme={"green"}
                         bg={"brand.acceptbutton"}
                         rounded={"full"}
