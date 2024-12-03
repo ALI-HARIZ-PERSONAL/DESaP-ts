@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { Box, Heading, Text, Button } from '@chakra-ui/react';
+import { Box, Heading, Text, Button, Stack } from '@chakra-ui/react';
 
 const ViewAccountPage = () => {
   const mockAccountData = {
@@ -24,9 +24,18 @@ const ViewAccountPage = () => {
       <Text fontSize="lg" mb="4">
         <strong>Role:</strong> {mockAccountData.role}
       </Text>
-      <Button as="a" href="/" colorScheme="blue">
-        Back to Home
-      </Button>
+
+      <Stack direction="row" spacing="4" mt="6">
+        {/* Button to update account */}
+        <Button as="a" href="/account/update" colorScheme="green">
+          Update Account
+        </Button>
+
+        {/* Button to navigate back to home */}
+        <Button as="a" href="/" colorScheme="blue">
+          Back to Home
+        </Button>
+      </Stack>
     </Box>
   );
 };

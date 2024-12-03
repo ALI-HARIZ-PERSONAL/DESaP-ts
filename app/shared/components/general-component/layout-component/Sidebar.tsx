@@ -40,7 +40,7 @@ export default function UserAccountNav() {
 				fontSize={"sm"}
 				fontWeight={400}
 				variant={"solid"}
-				href={"/login"}
+				href={"/account/login"}
 				bg={"brand.acceptbutton"}
 				colorScheme={"green"}
 			>
