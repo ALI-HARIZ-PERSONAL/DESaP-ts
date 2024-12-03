@@ -37,8 +37,8 @@ const publicRoutes = [
 	"/community/profile",
 ];
 
-const loginRoute = "/login";
-const registerRoute = "/register";
+const loginRoute = "account/login";
+const registerRoute = "account/register";
 const forbiddenRoute = "/forbidden";
 
 export async function middleware(req: NextRequest) {
