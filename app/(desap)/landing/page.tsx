@@ -2,7 +2,6 @@
 
 import { useUser } from "@/shared/providers/userProvider";
 import { Box, Heading, Container, Text, Button, Stack } from "@chakra-ui/react";
-import { Role } from "@prisma/client";
 
 export default function LandingPage() {
     const { userData } = useUser();
