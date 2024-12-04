@@ -7,6 +7,7 @@ const RegistrationPage = () => {
         username: '',
         email: '',
         password: '',
+        role: 'citizen',
     });
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -84,6 +85,18 @@ const RegistrationPage = () => {
                 style={{ display: 'block', width: '100%', margin: '10px 0'}}
             />
         </div>
+
+        <select
+            id="role"
+            name="role"
+            value={formData.role}
+            onChange={handleChange}
+            style={{ display: 'block', width:'100%', margin: '10px 0'}}
+            >
+                <option value="general_user">General User</option>
+                <option value="council_leader">Council Leader</option>
+                <option value="admin">Admin</option>
+            </select>
 
         <button type="submit" style={{ marginTop: '20px'}}>Register</button>
 
