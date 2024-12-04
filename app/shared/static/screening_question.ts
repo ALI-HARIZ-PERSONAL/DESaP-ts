@@ -60,12 +60,12 @@ export const questions = [
         points: [4, 2, 0],
     },
     {
-        question: "Do you have a sore throat?",
+        question: "Do you have a sore throat?",				// if have, the risk of dengue gains
         options: ["Yes", "No"],
         points: [-20, 0],
     },
     {
-        question: "Do you have any respiratory symptoms?",
+        question: "Do you have any respiratory symptoms?",	// if have, the risk of dengue gains
         options: ["Yes", "No"],
         points: [-20, 0],
     },
