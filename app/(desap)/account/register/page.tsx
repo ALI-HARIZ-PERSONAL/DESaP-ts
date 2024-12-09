@@ -47,7 +47,7 @@ const RegistrationPage = () => {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
-        if (!formData.username || !formData.email || !formData.password) {
+        if (!formData.username || !formData.email || !formData.password || !formData.mobileNumber) {
             alert('All fields are required!');
             return;
         }
@@ -137,13 +137,13 @@ const RegistrationPage = () => {
                     />
                 </div>
                 <div>
-                    <label htmlFor="password">Password</label>
+                    <label htmlFor="mobileNumber">Mobile Number</label>
                     <input
-                        type="password"
-                        id="password"
-                        name="password"
-                        placeholder="Enter your password"
-                        value={formData.password}
+                        type="tel"
+                        id="mobileNumber"
+                        name="mobileNumber"
+                        placeholder="Enter your mobile number"
+                        value={formData.mobileNumber}
                         onChange={handleChange}
                         style={{ display: 'block', width: '100%', margin: '10px 0' }}
                     />
@@ -161,7 +161,18 @@ const RegistrationPage = () => {
                     />
                     {ageError && <p style={{ color: 'red' }}>{ageError}</p>}
                 </div>
-
+                <div>
+                    <label htmlFor="password">Password</label>
+                    <input
+                        type="password"
+                        id="password"
+                        name="password"
+                        placeholder="Enter your password"
+                        value={formData.password}
+                        onChange={handleChange}
+                        style={{ display: 'block', width: '100%', margin: '10px 0' }}
+                    />
+                </div>
 
                 {/* Role Dropdown */}
                 <div style={{ marginBottom: '15px' }}>
