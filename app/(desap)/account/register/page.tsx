@@ -40,6 +40,8 @@ const RegistrationPage = () => {
 
             const data = await response.json();
             console.log('Registration Successful:', data);
+            console.log('Selected role:', formData.role);
+
 
             alert('Registration Successful!');
 

@@ -1,4 +1,19 @@
-'use client';
+import React, { useState } from 'react';
+import { useRouter } from 'next/navigation';
+
+const CouncilLeaderDashboard = () => {
+    return (
+        <div>
+            <h1>Member Dashboard</h1>
+            <p>Welcome to the council leader dashboard!</p>
+        </div>
+    );
+};
+
+export default CouncilLeaderDashboard;
+
+
+/*'use client';
 
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
@@ -116,7 +131,7 @@ const RegistrationPage = () => {
                     />
                 </div>
 
-                {/* Role Dropdown */}
+                { Role Dropdown }
                 <div style={{ marginBottom: '15px' }}>
                     <label htmlFor="role" style={{ fontWeight: 'bold', display: 'block' }}>
                         Role
@@ -142,7 +157,7 @@ const RegistrationPage = () => {
                     </select>
                 </div>
 
-                {/* Submit Button */}
+                { Submit Button }
                 <button
                     type="submit"
                     style={{
@@ -165,3 +180,4 @@ const RegistrationPage = () => {
 };
 
 export default RegistrationPage;
+*/
