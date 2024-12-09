@@ -5,24 +5,55 @@ import { useRouter } from 'next/navigation';
 
 const RegistrationPage = () => {
     const [formData, setFormData] = useState({
+        profilePicture: null,
         username: '',
         email: '',
+        mobileNumber: '',
+        birthDate: '',
         password: '',
+        confirmPassword: '',
         role: 'member',  // Default role
+        termsAccepted: false,
     });
 
+    const [ageError, setAgeError] = useState('');
     const router = useRouter();
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
         const { name, value } = e.target;
         setFormData({ ...formData, [name]: value });
+
+         // Validate birth date for age restriction
+         if (name === 'birthDate') {
+            const age = calculateAge(new Date(value));
+            if (age < 18) {
+                setAgeError('You must be at least 18 years old to register.');
+            } else {
+                setAgeError('');
+            }
+        }
+    };
+
+    const calculateAge = (birthDate: Date) => {
+        const today = new Date();
+        let age = today.getFullYear() - birthDate.getFullYear();
+        const monthDiff = today.getMonth() - birthDate.getMonth();
+        if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+            age--;
+        }
+        return age;
     };
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
-        if (!formData.username || !formData.email || !formData.password) {
+        if (!formData.username || !formData.email || !formData.password || !formData.mobileNumber) {
             alert('All fields are required!');
+            return;
+        }
+
+        if (ageError) {
+            alert('Please fix the errors before submitting.');
             return;
         }
 
@@ -50,8 +81,8 @@ const RegistrationPage = () => {
                 case 'community-leader':
                     router.push('/dashboard/council-leader');
                     break;
-                case 'admin':
-                    router.push('/dashboard/admin');
+                case 'operation-team':
+                    router.push('/dashboard/operation-team');
                     break;
                 case 'member':
                     router.push('/dashboard/member');
@@ -106,6 +137,31 @@ const RegistrationPage = () => {
                     />
                 </div>
                 <div>
+                    <label htmlFor="mobileNumber">Mobile Number</label>
+                    <input
+                        type="tel"
+                        id="mobileNumber"
+                        name="mobileNumber"
+                        placeholder="Enter your mobile number"
+                        value={formData.mobileNumber}
+                        onChange={handleChange}
+                        style={{ display: 'block', width: '100%', margin: '10px 0' }}
+                    />
+                </div>
+
+                <div>
+                    <label htmlFor="birthDate">Birth Date</label>
+                    <input
+                        type="date"
+                        id="birthDate"
+                        name="birthDate"
+                        value={formData.birthDate}
+                        onChange={handleChange}
+                        style={{ display: 'block', width: '100%', margin: '10px 0' }}
+                    />
+                    {ageError && <p style={{ color: 'red' }}>{ageError}</p>}
+                </div>
+                <div>
                     <label htmlFor="password">Password</label>
                     <input
                         type="password"
@@ -140,7 +196,7 @@ const RegistrationPage = () => {
                     >
                         <option value="community-leader">Community Leader</option>
                         <option value="member">Member</option>
-                        <option value="admin">Admin</option>
+                        <option value="operation-team">Operation Team</option>
                     </select>
                 </div>
 

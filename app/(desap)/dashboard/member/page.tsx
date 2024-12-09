@@ -1,5 +1,6 @@
 "use client";
 
+import { useUser } from "@/shared/providers/userProvider";
 import {
     HStack,
     Link,
@@ -12,6 +13,8 @@ import {
 } from "@chakra-ui/react";
 
 export default function MemberDashboard() {
+    const { userData } = useUser();
+
     return (
         <Box>
             {/* Navigation Bar */}
@@ -43,7 +46,7 @@ export default function MemberDashboard() {
                     lineHeight={"110%"}
                     textAlign={"center"}
                 >
-                    Welcome, Member! <br />
+                    Welcome, {userData?.name || "Member"}! <br />
                     <Text as={"span"} color={"#3e3030"}>
                         Your Dengue Risk Dashboard
                     </Text>
