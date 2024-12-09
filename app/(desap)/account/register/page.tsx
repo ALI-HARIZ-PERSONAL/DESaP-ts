@@ -36,10 +36,11 @@ const RegistrationPage = () => {
     };
 
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        if (e.target.files && e.target.files[0]) {
-            setFormData({ ...formData, profilePicture: e.target.files[0] });
-        }
-    };
+    if (e.target.files && e.target.files[0]) {
+        setFormData({ ...formData, profilePicture: e.target.files[0] });
+    }
+};
+
 
     const calculateAge = (birthDate: Date) => {
         const today = new Date();
