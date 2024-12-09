@@ -8,7 +8,6 @@ const RegistrationPage = () => {
         username: '',
         email: '',
         password: '',
-        role: 'member',
     });
 
     const router = useRouter();
@@ -71,75 +70,43 @@ const RegistrationPage = () => {
         >
             <h1 style={{ textAlign: 'center', color: '#333' }}>Register</h1>
 
-            <form onSubmit={handleSubmit}>
-                {/* Username Field */}
-                <div style={{ marginBottom: '15px' }}>
-                    <label htmlFor="username" style={{ fontWeight: 'bold', display: 'block' }}>
-                        Username
-                    </label>
-                    <input
-                        type="text"
-                        id="username"
-                        name="username"
-                        placeholder="Enter your username"
-                        value={formData.username}
-                        onChange={handleChange}
-                        style={{
-                            display: 'block',
-                            width: '100%',
-                            padding: '10px',
-                            marginTop: '5px',
-                            borderRadius: '4px',
-                            border: '1px solid #ccc',
-                        }}
-                    />
-                </div>
-
-                {/* Email Field */}
-                <div style={{ marginBottom: '15px' }}>
-                    <label htmlFor="email" style={{ fontWeight: 'bold', display: 'block' }}>
-                        Email
-                    </label>
-                    <input
-                        type="email"
-                        id="email"
-                        name="email"
-                        placeholder="Enter your email"
-                        value={formData.email}
-                        onChange={handleChange}
-                        style={{
-                            display: 'block',
-                            width: '100%',
-                            padding: '10px',
-                            marginTop: '5px',
-                            borderRadius: '4px',
-                            border: '1px solid #ccc',
-                        }}
-                    />
-                </div>
-
-                {/* Password Field */}
-                <div style={{ marginBottom: '15px' }}>
-                    <label htmlFor="password" style={{ fontWeight: 'bold', display: 'block' }}>
-                        Password
-                    </label>
-                    <input
-                        type="password"
-                        id="password"
-                        name="password"
-                        placeholder="Enter your password"
-                        value={formData.password}
-                        onChange={handleChange}
-                        style={{
-                            display: 'block',
-                            width: '100%',
-                            padding: '10px',
-                            marginTop: '5px',
-                            borderRadius: '4px',
-                            border: '1px solid #ccc',
-                        }}
-                    />
-                </div>
+      <form onSubmit={handleSubmit}>
+        <div>
+            <label htmlFor="username">Username</label>
+            <input
+                type="text"
+                id="username"
+                name="username"
+                placeholder="Enter your username"
+                value={formData.username}
+                onChange={handleChange}
+                style={{ display: 'block', width: '100%', margin: '10px 0'}}
+        />
+        </div>
+        <div>
+            <label htmlFor="email">Email</label>
+            <input
+                type="email"
+                id="email"
+                name="email"
+                placeholder="Enter your email"
+                value={formData.email}
+                onChange={handleChange}
+                style={{ display: 'block', width: '100%', margin: '10px 0'}}
+            />
+        </div>
+        <div>
+            <label htmlFor="password">Password</label>
+            <input
+                type="password"
+                id="password"
+                name="password"
+                placeholder="Enter your password"
+                value={formData.password}
+                onChange={handleChange}
+                style={{ display: 'block', width: '100%', margin: '10px 0'}}
+            />
+        </div>
 
                 {/* Role Dropdown */}
                 <div style={{ marginBottom: '15px' }}>
