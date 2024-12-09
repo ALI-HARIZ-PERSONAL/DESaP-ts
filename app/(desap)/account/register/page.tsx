@@ -34,6 +34,12 @@ const RegistrationPage = () => {
         }
     };
 
+    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        if (e.target.files && e.target.files[0]) {
+            setFormData({ ...formData, profilePicture: e.target.files[0] });
+        }
+    };
+
     const calculateAge = (birthDate: Date) => {
         const today = new Date();
         let age = today.getFullYear() - birthDate.getFullYear();
@@ -73,7 +79,6 @@ const RegistrationPage = () => {
             console.log('Registration Successful:', data);
             console.log('Selected role:', formData.role);
 
-
             alert('Registration Successful!');
 
             // Redirect based on role
@@ -109,10 +114,40 @@ const RegistrationPage = () => {
                 backgroundColor: '#fff',
             }}
         >
-            <h1 style={{ textAlign: 'center', color: '#333' }}>Register</h1>
-
+            <h1 style={{ textAlign: 'center', color: '#333', marginBottom: '50px' }}>Register</h1>
+            
             <form onSubmit={handleSubmit}>
-                <div>
+                
+            <div style={{ textAlign: 'center', marginBottom: '20px' }}>
+                <label style={{ fontWeight: 'bold', marginBottom: '10px', display: 'block' }}>
+                Profile Picture
+                </label>
+                <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleFileChange}
+                    style={{ display: 'block', margin: '0 auto' }}
+                />
+                {formData.profilePicture && (
+                <div style={{ marginTop: '10px' }}>
+                    <img
+                        src={URL.createObjectURL(formData.profilePicture)}
+                        alt="Profile Preview"
+                        style={{
+                            width: '120px',
+                            height: '120px',
+                            borderRadius: '50%',
+                            objectFit: 'cover',
+                            display: 'block',
+                            margin: '0 auto',
+                            border: '2px solid #ccc',
+                        }}
+                    />
+                </div>
+                )}
+            </div>
+
+                <div style={{ marginTop: '30px',marginBottom: '30px' }}>
                     <label htmlFor="username">Username</label>
                     <input
                         type="text"
@@ -121,10 +156,10 @@ const RegistrationPage = () => {
                         placeholder="Enter your username"
                         value={formData.username}
                         onChange={handleChange}
-                        style={{ display: 'block', width: '100%', margin: '10px 0' }}
+                        style={{ display: 'block', width: '100%', margin: '8px 0' }}
                     />
                 </div>
-                <div>
+                <div style={{ marginBottom: '30px' }}>
                     <label htmlFor="email">Email</label>
                     <input
                         type="email"
@@ -133,10 +168,10 @@ const RegistrationPage = () => {
                         placeholder="Enter your email"
                         value={formData.email}
                         onChange={handleChange}
-                        style={{ display: 'block', width: '100%', margin: '10px 0' }}
+                        style={{ display: 'block', width: '100%', margin: '8px 0'}}
                     />
                 </div>
-                <div>
+                <div style={{ marginBottom: '30px' }}>
                     <label htmlFor="mobileNumber">Mobile Number</label>
                     <input
                         type="tel"
@@ -145,11 +180,11 @@ const RegistrationPage = () => {
                         placeholder="Enter your mobile number"
                         value={formData.mobileNumber}
                         onChange={handleChange}
-                        style={{ display: 'block', width: '100%', margin: '10px 0' }}
+                        style={{ display: 'block', width: '100%', margin: '8px 0' }}
                     />
                 </div>
 
-                <div>
+                <div style={{ marginBottom: '30px' }}>
                     <label htmlFor="birthDate">Birth Date</label>
                     <input
                         type="date"
@@ -157,11 +192,11 @@ const RegistrationPage = () => {
                         name="birthDate"
                         value={formData.birthDate}
                         onChange={handleChange}
-                        style={{ display: 'block', width: '100%', margin: '10px 0' }}
+                        style={{ display: 'block', width: '100%', margin: '8px 0' }}
                     />
                     {ageError && <p style={{ color: 'red' }}>{ageError}</p>}
                 </div>
-                <div>
+                <div style={{ marginBottom: '30px' }}>
                     <label htmlFor="password">Password</label>
                     <input
                         type="password"
@@ -170,12 +205,12 @@ const RegistrationPage = () => {
                         placeholder="Enter your password"
                         value={formData.password}
                         onChange={handleChange}
-                        style={{ display: 'block', width: '100%', margin: '10px 0' }}
+                        style={{ display: 'block', width: '100%', margin: '8px 0' }}
                     />
                 </div>
 
                 {/* Role Dropdown */}
-                <div style={{ marginBottom: '15px' }}>
+                <div style={{ marginBottom: '30px' }}>
                     <label htmlFor="role" style={{ fontWeight: 'bold', display: 'block' }}>
                         Role
                     </label>
