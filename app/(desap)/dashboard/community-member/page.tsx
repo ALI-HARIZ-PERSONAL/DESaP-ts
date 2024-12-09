@@ -46,50 +46,52 @@ export default function MemberDashboard() {
                     lineHeight={"110%"}
                     textAlign={"center"}
                 >
-                    Welcome, {userData?.name || "Member"}! <br />
+                    Welcome, {userData?.name || "Community Member"}! <br />
                     <Text as={"span"} color={"#3e3030"}>
                         Your Dengue Risk Dashboard
                     </Text>
                 </Heading>
                 <Text color={"gray.500"} textAlign={"center"} mt={4}>
-                    Analyze your symptoms, report dengue cases, and track your history
-                    conveniently through this dashboard.
+                    Report your own dengue case, view reported dengue cases, and manage your council conveniently through this dashboard.
                 </Text>
 
                 {/* Action Buttons */}
                 <VStack spacing={6} mt={8}>
-                    <Button
-                        as={"a"}
-                        href="/member/analyze-symptoms"
-                        colorScheme={"green"}
-                        bg={"green.500"}
-                        rounded={"full"}
-                        px={6}
-                        size={"lg"}
-                    >
-                        Analyze Symptoms
-                    </Button>
+                    {/*Report Own Dengue Case */}
                     <Button
                         as={"a"}
                         href="/member/report-dengue"
-                        colorScheme={"red"}
-                        bg={"red.500"}
-                        rounded={"full"}
-                        px={6}
-                        size={"lg"}
-                    >
-                        Report Dengue Cases
-                    </Button>
-                    <Button
-                        as={"a"}
-                        href="/member/view-history"
                         colorScheme={"blue"}
                         bg={"blue.500"}
                         rounded={"full"}
                         px={6}
                         size={"lg"}
                     >
-                        View History
+                        Report Dengue Case
+                    </Button>
+
+                    {/*View Reported Dengue Cases in the Council*/}
+                    <Button
+                        as={"a"}
+                        href="/member/view-report"
+                        colorScheme={"blue"}
+                        bg={"blue.500"}
+                        rounded={"full"}
+                        px={6}
+                        size={"lg"}
+                    >
+                        View Reported Dengue Case
+                    </Button>
+                    <Button
+                        as={"a"}
+                        href="/member/manage-council"
+                        colorScheme={"green"}
+                        bg={"green.500"}
+                        rounded={"full"}
+                        px={6}
+                        size={"lg"}
+                    >
+                        Manage Council
                     </Button>
                 </VStack>
             </Container>
