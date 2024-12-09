@@ -17,6 +17,7 @@ const RegistrationPage = () => {
     });
 
     const [ageError, setAgeError] = useState('');
+    const [passwordError, setPasswordError] = useState('');
     const router = useRouter();
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
@@ -52,35 +53,47 @@ const RegistrationPage = () => {
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-
+    
+        // Trim spaces from password fields before comparing
+        const trimmedPassword = formData.password.trim();
+        const trimmedConfirmPassword = formData.confirmPassword.trim();
+    
+        // Validate password confirmation before submitting
+        if (trimmedPassword !== trimmedConfirmPassword) {
+            setPasswordError('Passwords do not match.');
+            return;
+        } else {
+            setPasswordError('');
+        }
+    
         if (!formData.username || !formData.email || !formData.password || !formData.mobileNumber) {
             alert('All fields are required!');
             return;
         }
-
-        if (ageError) {
+    
+        if (passwordError || ageError) {
             alert('Please fix the errors before submitting.');
             return;
         }
-
+    
         try {
             const response = await fetch('/api/account/register', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(formData),
             });
-
+    
             if (!response.ok) {
                 alert('Failed to register!');
                 return;
             }
-
+    
             const data = await response.json();
             console.log('Registration Successful:', data);
             console.log('Selected role:', formData.role);
-
+    
             alert('Registration Successful!');
-
+    
             // Redirect based on role
             switch (formData.role) {
                 case 'community-leader':
@@ -101,6 +114,7 @@ const RegistrationPage = () => {
             alert('Something went wrong!');
         }
     };
+    
 
     return (
         <div
@@ -117,7 +131,8 @@ const RegistrationPage = () => {
             <h1 style={{ textAlign: 'center', color: '#333', marginBottom: '50px' }}>Register</h1>
             
             <form onSubmit={handleSubmit}>
-                
+
+            {/*Profile Picture*/}    
             <div style={{ textAlign: 'center', marginBottom: '20px' }}>
                 <label style={{ fontWeight: 'bold', marginBottom: '10px', display: 'block' }}>
                 Profile Picture
@@ -146,7 +161,8 @@ const RegistrationPage = () => {
                 </div>
                 )}
             </div>
-
+                
+                {/*Mobile Number Field*/}
                 <div style={{ marginTop: '30px',marginBottom: '30px' }}>
                     <label htmlFor="username">Username</label>
                     <input
@@ -159,6 +175,8 @@ const RegistrationPage = () => {
                         style={{ display: 'block', width: '100%', margin: '8px 0' }}
                     />
                 </div>
+
+                {/*Mobile Number Field*/}
                 <div style={{ marginBottom: '30px' }}>
                     <label htmlFor="email">Email</label>
                     <input
@@ -171,6 +189,8 @@ const RegistrationPage = () => {
                         style={{ display: 'block', width: '100%', margin: '8px 0'}}
                     />
                 </div>
+
+                {/*Mobile Number Field*/}
                 <div style={{ marginBottom: '30px' }}>
                     <label htmlFor="mobileNumber">Mobile Number</label>
                     <input
@@ -183,7 +203,8 @@ const RegistrationPage = () => {
                         style={{ display: 'block', width: '100%', margin: '8px 0' }}
                     />
                 </div>
-
+                
+                {/*BirthDate field*/}
                 <div style={{ marginBottom: '30px' }}>
                     <label htmlFor="birthDate">Birth Date</label>
                     <input
@@ -196,6 +217,8 @@ const RegistrationPage = () => {
                     />
                     {ageError && <p style={{ color: 'red' }}>{ageError}</p>}
                 </div>
+
+                {/*Password Field*/}
                 <div style={{ marginBottom: '30px' }}>
                     <label htmlFor="password">Password</label>
                     <input
@@ -208,6 +231,22 @@ const RegistrationPage = () => {
                         style={{ display: 'block', width: '100%', margin: '8px 0' }}
                     />
                 </div>
+
+                {/* Password Confirmation Field */}
+                <div style={{ marginBottom: '30px' }}>
+                    <label htmlFor="confirmPassword">Confirm Password</label>
+                    <input
+                        type="password"
+                        id="confirmPassword"
+                        name="confirmPassword"
+                        placeholder="Confirm your password"
+                        value={formData.confirmPassword}
+                        onChange={handleChange}
+                        style={{ display: 'block', width: '100%', margin: '10px 0' }}
+                    />
+                    {passwordError && <p style={{ color: 'red' }}>{passwordError}</p>}
+                </div>
+
 
                 {/* Role Dropdown */}
                 <div style={{ marginBottom: '30px' }}>
