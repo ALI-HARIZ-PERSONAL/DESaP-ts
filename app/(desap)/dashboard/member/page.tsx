@@ -1,6 +1,15 @@
 "use client";
 
-import { HStack, Link, Box, Container, Heading, Text } from "@chakra-ui/react";
+import {
+    HStack,
+    Link,
+    Box,
+    Container,
+    Heading,
+    Text,
+    Button,
+    VStack,
+} from "@chakra-ui/react";
 
 export default function MemberDashboard() {
     return (
@@ -43,6 +52,43 @@ export default function MemberDashboard() {
                     Analyze your symptoms, report dengue cases, and track your history
                     conveniently through this dashboard.
                 </Text>
+
+                {/* Action Buttons */}
+                <VStack spacing={6} mt={8}>
+                    <Button
+                        as={"a"}
+                        href="/member/analyze-symptoms"
+                        colorScheme={"green"}
+                        bg={"green.500"}
+                        rounded={"full"}
+                        px={6}
+                        size={"lg"}
+                    >
+                        Analyze Symptoms
+                    </Button>
+                    <Button
+                        as={"a"}
+                        href="/member/report-dengue"
+                        colorScheme={"red"}
+                        bg={"red.500"}
+                        rounded={"full"}
+                        px={6}
+                        size={"lg"}
+                    >
+                        Report Dengue Cases
+                    </Button>
+                    <Button
+                        as={"a"}
+                        href="/member/view-history"
+                        colorScheme={"blue"}
+                        bg={"blue.500"}
+                        rounded={"full"}
+                        px={6}
+                        size={"lg"}
+                    >
+                        View History
+                    </Button>
+                </VStack>
             </Container>
         </Box>
     );
