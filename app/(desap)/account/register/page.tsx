@@ -50,8 +50,8 @@ const RegistrationPage = () => {
                 case 'community-leader':
                     router.push('/dashboard/council-leader');
                     break;
-                case 'admin':
-                    router.push('/dashboard/admin');
+                case 'operation-team':
+                    router.push('/dashboard/operation-team');
                     break;
                 case 'member':
                     router.push('/dashboard/member');
@@ -140,7 +140,7 @@ const RegistrationPage = () => {
                     >
                         <option value="community-leader">Community Leader</option>
                         <option value="member">Member</option>
-                        <option value="admin">Admin</option>
+                        <option value="operation-team">Operation Team</option>
                     </select>
                 </div>
 
