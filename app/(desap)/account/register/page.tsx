@@ -98,6 +98,8 @@ const RegistrationPage = () => {
                 <option value="admin">Admin</option>
             </select>
 
+        
+
         <button type="submit" style={{ marginTop: '20px'}}>Register</button>
 
       </form>
