@@ -75,6 +75,11 @@ const RegistrationPage = () => {
             alert('Please fix the errors before submitting.');
             return;
         }
+
+        if (!formData.termsAccepted) {
+            alert('You must agree to the Terms and Conditions to register.');
+            return;
+        }
     
         try {
             const response = await fetch('/api/account/register', {
@@ -102,8 +107,8 @@ const RegistrationPage = () => {
                 case 'operation-team':
                     router.push('/dashboard/operation-team');
                     break;
-                case 'member':
-                    router.push('/dashboard/member');
+                case 'community-member':
+                    router.push('/dashboard/community-member');
                     break;
                 default:
                     router.push('/dashboard/member'); // Default redirection if role is not recognized
@@ -269,10 +274,26 @@ const RegistrationPage = () => {
                         }}
                     >
                         <option value="community-leader">Community Leader</option>
-                        <option value="member">Member</option>
+                        <option value="community-member">Community Member</option>
                         <option value="operation-team">Operation Team</option>
                     </select>
                 </div>
+
+                {/*TnC checkbox */}
+                <div>
+                    <input
+                        type="checkbox"
+                        id="terms"
+                        name="terms"
+                        onChange={(e) =>
+                            setFormData({ ...formData, termsAccepted: e.target.checked })
+                        }
+                    />
+                    <label htmlFor="terms">
+                        I agree to the <a href="/terms">Terms and Conditions</a>.
+                    </label>
+                </div>
+
 
                 {/* Submit Button */}
                 <button
