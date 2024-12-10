@@ -2,60 +2,89 @@ import db from "@/shared/providers/dbProvider";
 import { NextResponse } from "next/server";
 import bcrypt from "bcrypt";
 
-
 export async function POST(request: Request) {
-	try {
-		const body = await request.json();
-		const { userName, email, password, role } = body.data;
+  try {
+    const body = await request.json();
+    console.log("Received body:", body);
 
-		if (!userName || !email || !password || !role) {
-			return NextResponse.json({
-				error: "Missing info",
-				status: 400,
-			});
-		}
+    // Validate request payload
+    const {
+      username,
+      email,
+      password,
+      confirmPassword,
+      role,
+      mobileNumber,
+      birthDate,
+      profilePicture,
+      termsAccepted,
+    } = body;
 
-		const exist = await db.user.findUnique({
-			where: {
-				email: email,
-			},
-		});
+    // Ensure all required fields are present
+    if (
+      !username ||
+      !email ||
+      !password ||
+      !confirmPassword ||
+      !role ||
+      !termsAccepted
+    ) {
+      console.log("Missing required fields");
+      return NextResponse.json({ error: "Missing required fields", status: 400 });
+    }
 
-		if (exist) {
-			return NextResponse.json(
-				{
-					error: "User already exists OR Email already used",
-					status: 400,
-				},
-	
-			);
-		}	
-		const hashedPassword = await bcrypt.hash(password, 10);
+    // Validate password and confirm password match
+    if (password !== confirmPassword) {
+      console.log("Passwords do not match");
+      return NextResponse.json({
+        error: "Passwords do not match",
+        status: 400,
+      });
+    }
 
+    // Check if the email already exists
+    const existingUser = await db.collection("users").findOne({ email });
+    console.log("Checking if user exists:", existingUser);
 
+    if (existingUser) {
+      console.log("Email already exists");
+      return NextResponse.json({ error: "Email already exists", status: 400 });
+    }
 
-		const user = await db.user.create({
-			data: {
-				userName: userName,
-				email: email,
-				password: hashedPassword,
-				role: role,
-			},
-		});
+    // Hash the password
+    const hashedPassword = await bcrypt.hash(password, 10);
+    console.log("Password hashed successfully");
 
-		return NextResponse.json(
-			{
-				data: user,
-				message: "User created successfully",
-				status: 201,
-			},
-		);
-	} catch (error) {
-		return NextResponse.json(
-			{
-				message: "Something went wrong",
-				status: 500,
-			}
-		);
-	}
+    // Default profile picture if none provided
+    const defaultProfilePicture = "https://example.com/default-profile.jpg";
+
+    // Prepare the new user object
+    const newUser = {
+      username,
+      email,
+      password: hashedPassword,
+      role,
+      mobileNumber: mobileNumber || null,
+      birthDate: birthDate || null,
+      profilePicture: profilePicture || defaultProfilePicture,
+      createdAt: new Date(),
+    };
+
+    // Insert the user into the database
+    const result = await db.collection("users").insertOne(newUser);
+    console.log("Inserted user:", result.insertedId);
+
+    // Return success response
+    return NextResponse.json({
+      message: "User registered successfully",
+      userId: result.insertedId,
+    });
+  } catch (error: unknown) {
+    console.error("Error during registration:", error);
+    return NextResponse.json({
+      error: "Internal Server Error",
+      details: error instanceof Error ? error.message : "Unknown error",
+      status: 500,
+    });
+  }
 }

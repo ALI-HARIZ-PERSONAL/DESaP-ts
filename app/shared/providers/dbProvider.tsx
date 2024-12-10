@@ -1,13 +1,25 @@
-import { PrismaClient } from "@prisma/client";
+import { MongoClient } from "mongodb";
 
-const prisma = new PrismaClient();
+// MongoDB URI from environment variable
+const uri = process.env.MONGODB_URI || "your-mongo-uri-here";
 
-const globalForPrisma = global as unknown as {
-	prisma: PrismaClient;
-};
+// MongoDB client instance
+let client: MongoClient;
+let db: any;
 
-const db = globalForPrisma.prisma || prisma;
+// Specify your database name
+const dbName = "DESaPDB"; // Change "DESaPDB" to your desired database name
 
-if (process.env.NODE_ENV !== "production") globalForPrisma.prisma = prisma;
+// Create a MongoDB client and connect to the database
+if (process.env.NODE_ENV === "production") {
+  client = new MongoClient(uri);
+  db = client.db(dbName); // Explicitly set the database name
+} else {
+  if (!global._mongoClient) {
+    global._mongoClient = new MongoClient(uri);
+  }
+  client = global._mongoClient;
+  db = client.db(dbName); // Explicitly set the database name
+}
 
 export default db;
