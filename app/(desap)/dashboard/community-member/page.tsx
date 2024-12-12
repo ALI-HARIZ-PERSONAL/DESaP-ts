@@ -26,13 +26,13 @@ export default function MemberDashboard() {
                 boxShadow="sm"
             >
                 <HStack spacing={8}>
-                    <Link href="/member/home" fontWeight="bold" color="blue.500">
+                    <Link href="/" fontWeight="bold" color="blue.500">
                         Home
                     </Link>
-                    <Link href="/member/profile" fontWeight="bold" color="blue.500">
+                    <Link href="/account/view" fontWeight="bold" color="blue.500">
                         View Profile
                     </Link>
-                    <Link href="/member/settings" fontWeight="bold" color="blue.500">
+                    <Link href="/account/update" fontWeight="bold" color="blue.500">
                         Settings
                     </Link>
                 </HStack>
@@ -46,7 +46,7 @@ export default function MemberDashboard() {
                     lineHeight={"110%"}
                     textAlign={"center"}
                 >
-                    Welcome, {userData?.name || "Community Member"}! <br />
+                    Welcome, {userData?.userName || "Community Member"}! <br />
                     <Text as={"span"} color={"#3e3030"}>
                         Your Dengue Risk Dashboard
                     </Text>
