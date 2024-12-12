@@ -60,7 +60,7 @@ export default function MemberDashboard() {
                     {/*Report Own Dengue Case */}
                     <Button
                         as={"a"}
-                        href="/member/report-dengue"
+                        href="/community-member/report-dengue"
                         colorScheme={"blue"}
                         bg={"blue.500"}
                         rounded={"full"}
@@ -73,7 +73,7 @@ export default function MemberDashboard() {
                     {/*View Reported Dengue Cases in the Council*/}
                     <Button
                         as={"a"}
-                        href="/member/view-report"
+                        href="/community-member/view-report"
                         colorScheme={"blue"}
                         bg={"blue.500"}
                         rounded={"full"}
@@ -84,7 +84,7 @@ export default function MemberDashboard() {
                     </Button>
                     <Button
                         as={"a"}
-                        href="/member/manage-council"
+                        href="/community-member/manage-council"
                         colorScheme={"green"}
                         bg={"green.500"}
                         rounded={"full"}
