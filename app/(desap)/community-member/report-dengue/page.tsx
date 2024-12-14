@@ -28,7 +28,7 @@ export default function QuestionPage() {
 
     const handleSubmit = async () => {
         try {
-            const res = await fetch("../../../api/question/submitAnswer.js", {
+            const res = await fetch("/api/question/submitAnswer", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ responses }),

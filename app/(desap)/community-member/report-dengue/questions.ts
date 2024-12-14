@@ -70,8 +70,8 @@ export const questions = [
         points: [-20, 0],
     },
     {
-        question: "15. Have you experienced unusual bleeding (e.g., nosebleeds, gum bleeding, or blood in stools)?",
-        options: ["Frequent or severe", "Occasional (e.g., minor nosebleeds)", "No unusual bleeding"],
+        question: "15. Have you experienced unusual bleeding (e.g. nosebleeds, gum bleeding, or blood in stools)?",
+        options: ["Frequent or severe", "Occasional (e.g. minor nosebleeds)", "No unusual bleeding"],
         points: [15, 4, 0],
     },
 ];
