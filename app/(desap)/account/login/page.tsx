@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { Box, Button, FormControl, FormLabel, Input, Stack, Heading, Text, Container, Alert, AlertIcon } from '@chakra-ui/react';
 
 const LoginPage = () => {
@@ -10,6 +11,7 @@ const LoginPage = () => {
     });
     const [error, setError] = useState('');
     const [isLoading, setIsLoading] = useState(false);
+    const router = useRouter();
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
@@ -28,23 +30,37 @@ const LoginPage = () => {
         }
 
         try {
-            const response = await fetch('/api/login', {
+            const response = await fetch('/api/account/login', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(formData),
             });
 
+            const data = await response.json();
+
             if (!response.ok) {
-                const errorData = await response.json();
-                setError(errorData.message || 'Invalid login');
+                setError(data.error || 'Invalid login');
                 setIsLoading(false);
                 return;
             }
 
-            const data = await response.json();
-            console.log('Login successful:', data);
-            alert('Login successful!');
-            // Redirect or handle login success here
+            if (!data.role) {
+                setError('Login failed. User role not found.');
+                setIsLoading(false);
+                return;
+            }
+
+            // Redirect based on role
+            if (data.role === 'community-leader') {
+                router.push('/dashboard/community-leader');
+            } else if (data.role === 'community-member') {
+                router.push('/dashboard/community-member');
+            } else if (data.role === 'operation-team') {
+                router.push('/dashboard/operation-team');
+            } else {
+                setError('Unknown user role. Please contact support.');
+                setIsLoading(false);
+            }
         } catch (err) {
             console.error('Login error:', err);
             setError('Something went wrong. Please try again.');

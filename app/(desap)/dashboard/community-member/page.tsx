@@ -26,13 +26,13 @@ export default function MemberDashboard() {
                 boxShadow="sm"
             >
                 <HStack spacing={8}>
-                    <Link href="/member/home" fontWeight="bold" color="blue.500">
+                    <Link href="/" fontWeight="bold" color="blue.500">
                         Home
                     </Link>
-                    <Link href="/member/profile" fontWeight="bold" color="blue.500">
+                    <Link href="/account/view" fontWeight="bold" color="blue.500">
                         View Profile
                     </Link>
-                    <Link href="/member/settings" fontWeight="bold" color="blue.500">
+                    <Link href="/account/update" fontWeight="bold" color="blue.500">
                         Settings
                     </Link>
                 </HStack>
@@ -46,7 +46,7 @@ export default function MemberDashboard() {
                     lineHeight={"110%"}
                     textAlign={"center"}
                 >
-                    Welcome, {userData?.name || "Community Member"}! <br />
+                    Welcome, {userData?.userName || "Community Member"}! <br />
                     <Text as={"span"} color={"#3e3030"}>
                         Your Dengue Risk Dashboard
                     </Text>
@@ -60,7 +60,7 @@ export default function MemberDashboard() {
                     {/*Report Own Dengue Case */}
                     <Button
                         as={"a"}
-                        href="/member/report-dengue"
+                        href="/community-member/report-dengue"
                         colorScheme={"blue"}
                         bg={"blue.500"}
                         rounded={"full"}
@@ -73,7 +73,7 @@ export default function MemberDashboard() {
                     {/*View Reported Dengue Cases in the Council*/}
                     <Button
                         as={"a"}
-                        href="/member/view-report"
+                        href="/community-member/view-report"
                         colorScheme={"blue"}
                         bg={"blue.500"}
                         rounded={"full"}
@@ -84,7 +84,7 @@ export default function MemberDashboard() {
                     </Button>
                     <Button
                         as={"a"}
-                        href="/member/manage-council"
+                        href="/community-member/manage-council"
                         colorScheme={"green"}
                         bg={"green.500"}
                         rounded={"full"}
