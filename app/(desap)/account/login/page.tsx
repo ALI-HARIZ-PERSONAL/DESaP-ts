@@ -28,7 +28,7 @@ const LoginPage = () => {
         }
 
         try {
-            const response = await fetch('/api/login', {
+            const response = await fetch('/api/account/login', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(formData),
@@ -36,14 +36,14 @@ const LoginPage = () => {
 
             if (!response.ok) {
                 const errorData = await response.json();
-                setError(errorData.message || 'Invalid login');
+                setError(errorData.error || 'Invalid login');
                 setIsLoading(false);
                 return;
             }
 
             const data = await response.json();
             console.log('Login successful:', data);
-            alert('Login successful!');
+            alert(`Welcome back, ${data.username}!`);
             // Redirect or handle login success here
         } catch (err) {
             console.error('Login error:', err);
