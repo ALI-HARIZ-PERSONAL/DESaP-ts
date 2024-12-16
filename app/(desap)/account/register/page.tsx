@@ -103,7 +103,7 @@ const RegistrationPage = () => {
             // Redirect based on role
             switch (formData.role) {
                 case 'community-leader':
-                    router.push('/dashboard/council-leader');
+                    router.push('/dashboard/community-leader');
                     break;
                 case 'operation-team':
                     router.push('/dashboard/operation-team');
