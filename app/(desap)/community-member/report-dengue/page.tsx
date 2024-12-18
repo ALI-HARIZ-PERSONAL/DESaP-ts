@@ -28,12 +28,44 @@ export default function QuestionPage() {
 
     const handleSubmit = async () => {
         try {
-            const res = await fetch("/api/question/submitAnswer", {
+            // Compute the total score and prepare the data to send
+            const responseData = Object.entries(responses).map(([questionIndex, answer]) => {
+                const index = parseInt(questionIndex, 10);
+                const question = questions[index];
+                let score = 0;
+    
+                if (Array.isArray(answer)) {
+                    // Multiple choice question
+                    score = answer.reduce((acc, optionIndex) => acc + question.points[optionIndex], 0);
+                } else if (typeof answer === "number") {
+                    // Single choice question
+                    score = question.points[answer];
+                }
+    
+                return {
+                    questionIndex: index,
+                    selectedAnswers: answer, // Can be a number or array of numbers
+                    score,
+                };
+            });
+    
+            const totalScore = responseData.reduce((sum, item) => sum + item.score, 0);
+    
+            // Create the payload
+            const payload = {
+                userId: "user_id_placeholder", // Replace with actual user ID if available
+                reportedDate: new Date().toISOString(),
+                responses: responseData, // Include question index and answers
+                totalScore,
+            };
+    
+            // Send the data to the backend
+            const res = await fetch("/api/community-member/report-dengue", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ responses }),
+                body: JSON.stringify(payload),
             });
-
+    
             if (res.ok) {
                 alert("Thank you for submitting your responses!");
                 setSubmitted(true);
