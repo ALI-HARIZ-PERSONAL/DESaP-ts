@@ -1,47 +1,37 @@
-import db from "@/shared/providers/dbProvider";
+// api/profile/readByEmail/route.ts
+import db from "@/shared/providers/dbProvider"; // Using your existing provider
 import { NextResponse } from "next/server";
 
 export async function GET(request: Request) {
-	try {
-		const urlParams = new URL(request.url).searchParams;
-		const email = urlParams.get("email");
-		if (!email) {
-			return NextResponse.json({
-				error: "Missing email",
-				status: 400,
-			});
-		}
+  try {
+    const urlParams = new URL(request.url).searchParams;
+    const email = urlParams.get("email");
 
-		const user = await db.user.findUnique({
-			where: {
-				email: email,
-			},
-			select: {
-				id: true,
-				userName: true,
-				email: true,
-				role: true,
-				livingAddress: true,
-				councilId: true,
-			},
-		});
+    if (!email) {
+      return NextResponse.json(
+        { error: "Missing email", status: 400 },
+        { status: 400 }
+      );
+    }
 
-		if (!user) {
-			return NextResponse.json({
-				data: null,
-				message: "User not found",
-				status: 200,
-			});
-		}
-		return NextResponse.json({
-			data: user,
-			message: "User loaded",
-			status: 200,
-		});
-	} catch (error) {
-		return NextResponse.json({
-			error: "Something went wrong",
-			status: 400,
-		});
-	}
+    const user = await db.collection("users").findOne(
+      { email }, // Filter by email
+      { projection: { userName: 1, email: 1, role: 1 } } // Select only necessary fields
+    );
+
+    if (!user) {
+      return NextResponse.json(
+        { error: "User not found", status: 404 },
+        { status: 404 }
+      );
+    }
+
+    return NextResponse.json(user, { status: 200 });
+  } catch (error) {
+    console.error("Error fetching user data:", error);
+    return NextResponse.json(
+      { error: "An unexpected error occurred", status: 500 },
+      { status: 500 }
+    );
+  }
 }
