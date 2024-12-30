@@ -19,7 +19,8 @@ import {
     ModalFooter,
     useDisclosure,
 } from "@chakra-ui/react";
-import { useEffect, useRef, useState } from "react";
+import { GoogleMap, Marker, InfoWindow, HeatmapLayer, useJsApiLoader } from "@react-google-maps/api";
+import { useState } from "react";
 
 interface Report {
     id: number;
@@ -29,7 +30,7 @@ interface Report {
     date: string;
     status: string;
     viewed: boolean;
-    location: { lat: number; lng: number }; // Add location to the report
+    location: { lat: number; lng: number };
 }
 
 const VerifyReport: React.FC = () => {
@@ -41,8 +42,8 @@ const VerifyReport: React.FC = () => {
             submittedBy: "user1",
             date: "2024-06-01",
             status: "Pending",
-            viewed: false,
-            location: { lat: 3.139, lng: 101.6869 }, // Example lat/lng for Kuala Lumpur
+            viewed: true,
+            location: { lat: 3.139, lng: 101.6869 }, // Kuala Lumpur
         },
         {
             id: 2,
@@ -51,37 +52,84 @@ const VerifyReport: React.FC = () => {
             submittedBy: "user2",
             date: "2024-06-02",
             status: "Pending",
-            viewed: false,
-            location: { lat: 1.3521, lng: 103.8198 }, // Example for Singapore
+            viewed: true,
+            location: { lat: 1.3521, lng: 103.8198 }, // Singapore
         },
     ]);
 
     const [selectedReport, setSelectedReport] = useState<Report | null>(null);
     const { isOpen, onOpen, onClose } = useDisclosure();
+    const [isInfoWindowOpen, setInfoWindowOpen] = useState(false);
 
-    const mapRef = useRef<HTMLDivElement>(null);
+    const { isLoaded } = useJsApiLoader({
+        googleMapsApiKey: "AIzaSyBpovSAJgK2XK__0HgBg6IETG3V4MN2r1w",
+    });
+
+    // Extract heat map data from reports
+    const heatMapData = reports.map((report) => new google.maps.LatLng(report.location.lat, report.location.lng));
+
+    // Define the black theme map style
+    const mapStyle = [
+        { elementType: "geometry", stylers: [{ color: "#212121" }] },
+        { elementType: "labels.icon", stylers: [{ visibility: "off" }] },
+        { elementType: "labels.text.fill", stylers: [{ color: "#757575" }] },
+        { elementType: "labels.text.stroke", stylers: [{ color: "#212121" }] },
+        {
+            featureType: "administrative",
+            elementType: "geometry",
+            stylers: [{ color: "#757575" }],
+        },
+        {
+            featureType: "administrative.country",
+            elementType: "labels.text.fill",
+            stylers: [{ color: "#9e9e9e" }],
+        },
+        {
+            featureType: "administrative.land_parcel",
+            stylers: [{ visibility: "off" }],
+        },
+        {
+            featureType: "landscape.man_made",
+            elementType: "geometry",
+            stylers: [{ color: "#1e1e1e" }],
+        },
+        {
+            featureType: "landscape.natural",
+            elementType: "geometry",
+            stylers: [{ color: "#2e2e2e" }],
+        },
+        {
+            featureType: "poi",
+            elementType: "geometry",
+            stylers: [{ color: "#212121" }],
+        },
+        {
+            featureType: "road",
+            elementType: "geometry",
+            stylers: [{ color: "#383838" }],
+        },
+        {
+            featureType: "road",
+            elementType: "geometry.stroke",
+            stylers: [{ color: "#383838" }],
+        },
+        {
+            featureType: "transit",
+            elementType: "geometry",
+            stylers: [{ color: "#2f2f2f" }],
+        },
+        {
+            featureType: "water",
+            elementType: "geometry",
+            stylers: [{ color: "#000000" }],
+        },
+    ];
 
     const handleViewReport = (report: Report) => {
         setSelectedReport(report);
+        setInfoWindowOpen(false);
         onOpen();
     };
-
-    useEffect(() => {
-        if (selectedReport && mapRef.current) {
-            const { lat, lng } = selectedReport.location;
-
-            const map = new google.maps.Map(mapRef.current, {
-                center: { lat, lng },
-                zoom: 12,
-            });
-
-            new google.maps.Marker({
-                position: { lat, lng },
-                map,
-                title: selectedReport.title,
-            });
-        }
-    }, [selectedReport]);
 
     const handleVerify = (id: number) => {
         setReports((prevReports) =>
@@ -117,7 +165,6 @@ const VerifyReport: React.FC = () => {
                             <Td>{report.status}</Td>
                             <Td>
                                 <Button
-                                 style={{ display: "inline-block", visibility: "visible" }}
                                     colorScheme="blue"
                                     size="sm"
                                     mr={2}
@@ -129,7 +176,7 @@ const VerifyReport: React.FC = () => {
                                     colorScheme="green"
                                     size="sm"
                                     onClick={() => handleVerify(report.id)}
-                                    isDisabled={!report.viewed || report.status === "Verified"}
+                                    isDisabled={report.status === "Verified"}
                                 >
                                     {report.status === "Verified" ? "Verified" : "Verify"}
                                 </Button>
@@ -151,7 +198,7 @@ const VerifyReport: React.FC = () => {
             </Box>
 
             {/* View Report Modal */}
-            {selectedReport && (
+            {selectedReport && isLoaded && (
                 <Modal isOpen={isOpen} onClose={onClose} size="lg">
                     <ModalOverlay />
                     <ModalContent>
@@ -164,7 +211,31 @@ const VerifyReport: React.FC = () => {
                             <Text mb={4}>{selectedReport.details}</Text>
 
                             {/* Google Maps Section */}
-                            <Box ref={mapRef} height="300px" width="100%" borderRadius="md" />
+                            <Box height="400px" width="100%" borderRadius="md" border="1px solid #ccc">
+                                <GoogleMap
+                                    mapContainerStyle={{ width: "100%", height: "100%" }}
+                                    zoom={12}
+                                    center={selectedReport.location}
+                                    options={{ styles: mapStyle }}
+                                >
+                                    <HeatmapLayer data={heatMapData} />
+                                    <Marker
+                                        position={selectedReport.location}
+                                        onClick={() => setInfoWindowOpen(true)}
+                                    />
+                                    {isInfoWindowOpen && (
+                                        <InfoWindow
+                                            position={selectedReport.location}
+                                            onCloseClick={() => setInfoWindowOpen(false)}
+                                        >
+                                            <Box>
+                                                <Text fontWeight="bold">{selectedReport.title}</Text>
+                                                <Text>{selectedReport.details}</Text>
+                                            </Box>
+                                        </InfoWindow>
+                                    )}
+                                </GoogleMap>
+                            </Box>
                         </ModalBody>
                         <ModalFooter>
                             <Button colorScheme="blue" mr={3} onClick={onClose}>
