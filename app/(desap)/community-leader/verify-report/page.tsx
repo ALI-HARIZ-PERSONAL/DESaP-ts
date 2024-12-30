@@ -20,7 +20,7 @@ import {
     useDisclosure,
 } from "@chakra-ui/react";
 import { GoogleMap, Marker, InfoWindow, HeatmapLayer, useJsApiLoader } from "@react-google-maps/api";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 interface Report {
     id: number;
@@ -60,13 +60,22 @@ const VerifyReport: React.FC = () => {
     const [selectedReport, setSelectedReport] = useState<Report | null>(null);
     const { isOpen, onOpen, onClose } = useDisclosure();
     const [isInfoWindowOpen, setInfoWindowOpen] = useState(false);
+    const [heatMapData, setHeatMapData] = useState<google.maps.LatLng[]>([]);
 
     const { isLoaded } = useJsApiLoader({
         googleMapsApiKey: "AIzaSyBpovSAJgK2XK__0HgBg6IETG3V4MN2r1w",
+        libraries: ["visualization"], // Required for HeatmapLayer
     });
 
-    // Extract heat map data from reports
-    const heatMapData = reports.map((report) => new google.maps.LatLng(report.location.lat, report.location.lng));
+    useEffect(() => {
+        if (isLoaded && window.google) {
+            // Initialize heat map data only after Google Maps API is loaded
+            const heatmapPoints = reports.map(
+                (report) => new google.maps.LatLng(report.location.lat, report.location.lng)
+            );
+            setHeatMapData(heatmapPoints);
+        }
+    }, [isLoaded, reports]);
 
     // Define the black theme map style
     const mapStyle = [
@@ -80,15 +89,6 @@ const VerifyReport: React.FC = () => {
             stylers: [{ color: "#757575" }],
         },
         {
-            featureType: "administrative.country",
-            elementType: "labels.text.fill",
-            stylers: [{ color: "#9e9e9e" }],
-        },
-        {
-            featureType: "administrative.land_parcel",
-            stylers: [{ visibility: "off" }],
-        },
-        {
             featureType: "landscape.man_made",
             elementType: "geometry",
             stylers: [{ color: "#1e1e1e" }],
@@ -97,26 +97,6 @@ const VerifyReport: React.FC = () => {
             featureType: "landscape.natural",
             elementType: "geometry",
             stylers: [{ color: "#2e2e2e" }],
-        },
-        {
-            featureType: "poi",
-            elementType: "geometry",
-            stylers: [{ color: "#212121" }],
-        },
-        {
-            featureType: "road",
-            elementType: "geometry",
-            stylers: [{ color: "#383838" }],
-        },
-        {
-            featureType: "road",
-            elementType: "geometry.stroke",
-            stylers: [{ color: "#383838" }],
-        },
-        {
-            featureType: "transit",
-            elementType: "geometry",
-            stylers: [{ color: "#2f2f2f" }],
         },
         {
             featureType: "water",
@@ -214,11 +194,11 @@ const VerifyReport: React.FC = () => {
                             <Box height="400px" width="100%" borderRadius="md" border="1px solid #ccc">
                                 <GoogleMap
                                     mapContainerStyle={{ width: "100%", height: "100%" }}
-                                    zoom={12}
+                                    zoom={6} // Adjust zoom to show larger area
                                     center={selectedReport.location}
                                     options={{ styles: mapStyle }}
                                 >
-                                    <HeatmapLayer data={heatMapData} />
+                                    {heatMapData.length > 0 && <HeatmapLayer data={heatMapData} />}
                                     <Marker
                                         position={selectedReport.location}
                                         onClick={() => setInfoWindowOpen(true)}
