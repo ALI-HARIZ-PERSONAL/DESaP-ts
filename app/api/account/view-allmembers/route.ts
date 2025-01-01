@@ -1,10 +1,16 @@
 import db from "@/shared/providers/dbProvider";
 import { NextResponse } from "next/server";
 
-export async function GET() {
+export async function GET(request: Request) {
     try {
-        // Fetch all users from the database
-        const members = await db.collection("users").find({}, { projection: { password: 0 } }).toArray();
+        const url = new URL(request.url);
+        const role = url.searchParams.get("role");
+
+        if (!role) {
+            return NextResponse.json({ error: "Role is required to filter members", status: 400 });
+        }
+
+        const members = await db.collection("users").find({role}, { projection: { password: 0 } }).toArray();
 
         return NextResponse.json({ members });
     } catch (error) {

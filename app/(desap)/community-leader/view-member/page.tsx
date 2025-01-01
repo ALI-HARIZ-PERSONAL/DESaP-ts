@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Box, Table, Thead, Tbody, Tr, Th, Td, Text, Button, Spinner } from "@chakra-ui/react";
+import { Box, Table, Thead, Tbody, Tr, Th, Td, Text, Button, Spinner, Select } from "@chakra-ui/react";
 
 interface Member{
     username: string;
@@ -11,12 +11,14 @@ interface Member{
 
 const ViewMembers: React.FC = () => {
     const [members, setMembers] = useState<Member[]>([]);
+    const [role, setRole] = useState("member");
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         async function fetchMembers() {
+            setLoading(true);
             try {
-                const response = await fetch("/api/account/view-allmembers");
+                const response = await fetch(`/api/account/view-allmembers?role=${role}`);
                 const data = await response.json();
                 setMembers(data.members || []);
             } catch (error) {
@@ -26,13 +28,23 @@ const ViewMembers: React.FC = () => {
             }
         }
         fetchMembers();
-    }, []);
+    }, [role]);
 
     return (
         <Box maxW="6xl" mx="auto" py={10} px={6}>
             <Text fontSize="2xl" fontWeight="bold" mb={6}>
                 Council Members
             </Text>
+            <Select
+                value={role}
+                onChange={(e) => setRole(e.target.value)}
+                mb={4}
+                maxW="300px"
+                mx="auto"
+            >
+                <option value="member">Community Members</option>
+                <option value="community-leader">Community Leaders</option>
+            </Select>
             {loading ? (
                 <Box textAlign="center">
                     <Spinner size="lg" />
