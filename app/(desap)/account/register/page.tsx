@@ -12,7 +12,7 @@ const RegistrationPage = () => {
         birthDate: '',
         password: '',
         confirmPassword: '',
-        role: 'member',  // Default role
+        role: '',
         termsAccepted: false,
     });
 
@@ -71,7 +71,12 @@ const RegistrationPage = () => {
             alert('All fields are required!');
             return;
         }
-    
+        
+        if (formData.role === "") {
+            alert('Please select a role!');
+            return;
+        }
+
         if (passwordError || ageError) {
             alert('Please fix the errors before submitting.');
             return;
@@ -110,9 +115,6 @@ const RegistrationPage = () => {
                     break;
                 case 'community-member':
                     router.push('/dashboard/community-member');
-                    break;
-                default:
-                    router.push('/dashboard/member'); // Default redirection if role is not recognized
                     break;
             }
         } catch (error) {
@@ -274,6 +276,7 @@ const RegistrationPage = () => {
                             backgroundColor: '#fff',
                         }}
                     >
+                        <option value="">Select a role</option>
                         <option value="community-leader">Community Leader</option>
                         <option value="community-member">Community Member</option>
                         <option value="operation-team">Operation Team</option>
