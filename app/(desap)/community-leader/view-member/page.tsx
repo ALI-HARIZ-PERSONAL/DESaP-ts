@@ -74,7 +74,7 @@ const ViewMembers: React.FC = () => {
                 maxW="300px"
                 mx="auto"
             >
-                <option value="member">Community Members</option>
+                <option value="community-member">Community Members</option>
                 <option value="community-leader">Community Leaders</option>
             </Select>
             {loading ? (
