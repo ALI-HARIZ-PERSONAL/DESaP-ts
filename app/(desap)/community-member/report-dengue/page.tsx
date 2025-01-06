@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { use, useState } from "react";
 import {
     Box,
     Button,
@@ -12,6 +12,8 @@ import {
     Text,
     Textarea,
     VStack,
+    List,
+    ListItem,
 } from "@chakra-ui/react";
 import { questions } from "./questions";
 
@@ -19,6 +21,13 @@ export default function QuestionPage() {
     const [responses, setResponses] = useState<Record<number, number | number[] | undefined>>({});
     const [address, setAddress] = useState(""); // State to store the address input
     const [submitted, setSubmitted] = useState(false);
+    const [searchTerm, setSearchTerm] = useState("");
+    const [searchResults, setSearchResults] = useState<any[]>([]);
+    const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
+    const [pin, setPin] = useState("");
+    const [isPinValid, setIsPinValid] = useState(false);
+    const [authenticatedUser, setAuthenticatedUser] = useState<{ username: string; role: string } | null>(null);
+
 
     const handleChange = (questionIndex: number, optionIndex: number, isChecked: boolean) => {
         setResponses((prev) => {
@@ -38,7 +47,54 @@ export default function QuestionPage() {
         });
     };
 
+    const handleSearch = async () => {
+        try {
+            const res = await fetch(`/api/account/search-memberToDelete?query=${encodeURIComponent(searchTerm)}`)
+            if (res.ok) {
+                const data = await res.json();
+                setSearchResults(data.members);
+                setSelectedUserId(null);
+            } else {
+                alert("Error fetching accounts. Please try again.");
+            } 
+        } catch (error) {
+            console.error("Error during search:", error);
+        }
+    }
+
+    const handlePinValidation = async () => {
+        try {
+            console.log(JSON.stringify({ userId: selectedUserId, password: pin }));
+
+            const res = await fetch(`/api/account/validate-password`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ userId: selectedUserId, password:pin }),
+            });
+           
+            if (res.ok) {
+                const data = await res.json();
+                if (data.userId) {
+                    setIsPinValid(true);
+                    setSearchResults([]);
+                    setAuthenticatedUser({ username: data.username, role: data.role });
+                } else {
+                    alert("Invalid Password. Please try again.");
+                }
+            } else {
+                alert("Error validating Password. Please try again.");
+            }
+        } catch (error) {
+            console.error("Error during password validation:", error);
+        }
+    };
+
     const handleSubmit = async () => {
+        if (!selectedUserId) {
+            alert("Please select your account before submitting.");
+            return;
+        }
+
         try {
             // Prepare the data to send
             const responseData = Object.entries(responses).map(([questionIndex, answer]) => {
@@ -65,7 +121,7 @@ export default function QuestionPage() {
 
             // Create the payload
             const payload = {
-                userId: "user_id_placeholder", // Replace with actual user ID if available
+                userId: selectedUserId, // Replace with actual user ID if available
                 reportedDate: new Date().toISOString(),
                 responses: responseData,
                 totalScore,
@@ -112,6 +168,62 @@ export default function QuestionPage() {
             </Heading>
             {!submitted ? (
                 <VStack spacing={8}>
+                    <Box w="full">
+                        <Text mb={3} fontWeight="bold">
+                            Search your account:
+                        </Text>
+                        <Stack direction="row" spacing={4}>
+                            <Input
+                                placeholder="Enter your name or email..."
+                                value={searchTerm}
+                                onChange={(e) => setSearchTerm(e.target.value)}
+                            />
+                            <Button colorScheme="blue" onClick={handleSearch}>
+                                Search
+                            </Button>
+                        </Stack>
+                        {searchResults.length > 0 && (
+                            <List spacing={2} mt={4}>
+                                {searchResults.map((member) => (
+                                    <ListItem
+                                        key={member._id}
+                                        cursor="pointer"
+                                        p={3}
+                                        borderRadius="md"
+                                        bg={selectedUserId === member._id ? "teal.200" : "gray.100"}
+                                        onClick={() => setSelectedUserId(member._id)} // Select this user only    
+                                    >
+                                        <Box>
+                                            <Text fontWeight="bold">{member.username}</Text>
+                                            <Text fontSize="sm">{member.email}</Text>
+                                        </Box>
+                                    </ListItem>
+                                ))}
+                            </List>
+                        )}
+                        {selectedUserId && !isPinValid && (
+                            <Box mt={4}>
+                                <Text>Enter Password for selected user:</Text>
+                                <Input
+                                    type="password"
+                                    placeholder="Enter Password..."
+                                    value={pin}
+                                    onChange={(e) => setPin(e.target.value)}
+                                    mb={3}
+                                />
+                                <Button colorScheme="teal" onClick={handlePinValidation}>
+                                    Validate Password
+                                </Button>
+                            </Box>
+                        )}
+                        {isPinValid && authenticatedUser && (
+                            <Box mt={4} p={4} borderWidth={1} borderRadius="md" bg="green.100">
+                                <Text fontWeight="bold">Authenticated User:</Text>
+                                <Text>Username: {authenticatedUser.username}</Text>
+                                <Text>Role: {authenticatedUser.role}</Text>
+                            </Box>
+                        )}                        
+                    </Box>
                     {questions.map((q, index) => (
                         <Box key={index} borderWidth={1} borderRadius="md" p={5} w="full">
                             <Text mb={3} fontWeight="bold">
@@ -154,7 +266,15 @@ export default function QuestionPage() {
                     </Button>
                 </VStack>
             ) : (
-                <Text>Thank you for completing the questionnaire!</Text>
+                <Box textAlign="center">
+                    <Text mb={4}>Thank you for completing the questionnaire!</Text>
+                    <Button
+                        colorScheme="teal"
+                        onClick={() => (window.location.href = "/dashboard/community-member")}
+                    >
+                        Back to Dashboard
+                    </Button>
+                </Box>
             )}
         </Container>
     );
