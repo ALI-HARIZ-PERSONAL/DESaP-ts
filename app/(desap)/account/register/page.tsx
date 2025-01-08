@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { Box, Button, Input, Text, Select, Checkbox, VStack, FormControl, FormErrorMessage, Spinner } from '@chakra-ui/react';
 
 const RegistrationPage = () => {
     const [formData, setFormData] = useState({
@@ -18,14 +19,15 @@ const RegistrationPage = () => {
 
     const [ageError, setAgeError] = useState('');
     const [passwordError, setPasswordError] = useState('');
+    const [formError, setFormError] = useState<string | null>(null);
+    const [isLoading, setIsLoading] = useState(false);
     const router = useRouter();
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
         const { name, value } = e.target;
         setFormData({ ...formData, [name]: value });
 
-         // Validate birth date for age restriction
-         if (name === 'birthDate') {
+        if (name === 'birthDate') {
             const age = calculateAge(new Date(value));
             if (age < 18) {
                 setAgeError('You must be at least 18 years old to register.');
@@ -36,11 +38,10 @@ const RegistrationPage = () => {
     };
 
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-        setFormData({ ...formData, profilePicture: e.target.files[0] });
-    }
-};
-
+        if (e.target.files && e.target.files[0]) {
+            setFormData({ ...formData, profilePicture: e.target.files[0] });
+        }
+    };
 
     const calculateAge = (birthDate: Date) => {
         const today = new Date();
@@ -54,58 +55,53 @@ const RegistrationPage = () => {
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-    
-        // Trim spaces from password fields before comparing
-        const trimmedPassword = formData.password.trim();
-        const trimmedConfirmPassword = formData.confirmPassword.trim();
-    
-        // Validate password confirmation before submitting
-        if (trimmedPassword !== trimmedConfirmPassword) {
+
+        // Validate password confirmation
+        if (formData.password.trim() !== formData.confirmPassword.trim()) {
             setPasswordError('Passwords do not match.');
             return;
         } else {
             setPasswordError('');
         }
-    
+
+        // Check for missing fields
         if (!formData.username || !formData.email || !formData.password || !formData.mobileNumber) {
-            alert('All fields are required!');
-            return;
-        }
-        
-        if (formData.role === "") {
-            alert('Please select a role!');
+            setFormError('All fields are required.');
             return;
         }
 
-        if (passwordError || ageError) {
-            alert('Please fix the errors before submitting.');
+        if (!formData.role) {
+            setFormError('Please select a role.');
             return;
         }
 
         if (!formData.termsAccepted) {
-            alert('You must agree to the Terms and Conditions to register.');
+            setFormError('You must agree to the Terms and Conditions.');
             return;
         }
-    
+
+        if (ageError || passwordError) {
+            setFormError('Please fix the errors before submitting.');
+            return;
+        }
+
+        setFormError(null);
+        setIsLoading(true);
+
         try {
             const response = await fetch('/api/account/register', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(formData),
             });
-    
+
             if (!response.ok) {
-                alert('Failed to register!');
+                const errorData = await response.json();
+                setFormError(errorData.message || 'Failed to register.');
                 return;
             }
-    
-            const data = await response.json();
-            console.log('Registration Successful:', data);
-            console.log('Selected role:', formData.role);
-    
-            alert('Registration Successful!');
-    
-            // Redirect based on role
+
+            alert('Registration successful!');
             switch (formData.role) {
                 case 'community-leader':
                     router.push('/dashboard/community-leader');
@@ -118,206 +114,87 @@ const RegistrationPage = () => {
                     break;
             }
         } catch (error) {
-            console.error('Error:', error);
-            alert('Something went wrong!');
+            setFormError('Something went wrong. Please try again.');
+        } finally {
+            setIsLoading(false);
         }
     };
-    
 
     return (
-        <div
-            style={{
-                maxWidth: '400px',
-                margin: '40px auto',
-                padding: '20px',
-                border: '1px solid #ccc',
-                borderRadius: '8px',
-                boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
-                backgroundColor: '#fff',
-            }}
-        >
-            <h1 style={{ textAlign: 'center', color: '#333', marginBottom: '50px' }}>Register</h1>
-            
+        <Box maxW="400px" mx="auto" mt={10} p={6} borderWidth={1} borderRadius="md" boxShadow="lg" bg="white">
+            <Text fontSize="2xl" fontWeight="bold" textAlign="center" mb={6}>
+                Register
+            </Text>
             <form onSubmit={handleSubmit}>
-
-            {/*Profile Picture*/}    
-            <div style={{ textAlign: 'center', marginBottom: '20px' }}>
-                <label style={{ fontWeight: 'bold', marginBottom: '10px', display: 'block' }}>
-                Profile Picture
-                </label>
-                <input
-                    type="file"
-                    accept="image/*"
-                    onChange={handleFileChange}
-                    style={{ display: 'block', margin: '0 auto' }}
-                />
-                {formData.profilePicture && (
-                <div style={{ marginTop: '10px' }}>
-                    <img
-                        src={URL.createObjectURL(formData.profilePicture)}
-                        alt="Profile Preview"
-                        style={{
-                            width: '120px',
-                            height: '120px',
-                            borderRadius: '50%',
-                            objectFit: 'cover',
-                            display: 'block',
-                            margin: '0 auto',
-                            border: '2px solid #ccc',
-                        }}
-                    />
-                </div>
-                )}
-            </div>
-                
-                {/*Mobile Number Field*/}
-                <div style={{ marginTop: '30px',marginBottom: '30px' }}>
-                    <label htmlFor="username">Username</label>
-                    <input
-                        type="text"
-                        id="username"
+                <VStack spacing={4}>
+                    <FormControl isInvalid={!!formError}>
+                        {formError && <FormErrorMessage>{formError}</FormErrorMessage>}
+                    </FormControl>
+                    <Input
                         name="username"
-                        placeholder="Enter your username"
+                        placeholder="Username"
                         value={formData.username}
                         onChange={handleChange}
-                        style={{ display: 'block', width: '100%', margin: '8px 0' }}
                     />
-                </div>
-
-                {/*Mobile Number Field*/}
-                <div style={{ marginBottom: '30px' }}>
-                    <label htmlFor="email">Email</label>
-                    <input
+                    <Input
                         type="email"
-                        id="email"
                         name="email"
-                        placeholder="Enter your email"
+                        placeholder="Email"
                         value={formData.email}
                         onChange={handleChange}
-                        style={{ display: 'block', width: '100%', margin: '8px 0'}}
                     />
-                </div>
-
-                {/*Mobile Number Field*/}
-                <div style={{ marginBottom: '30px' }}>
-                    <label htmlFor="mobileNumber">Mobile Number</label>
-                    <input
+                    <Input
                         type="tel"
-                        id="mobileNumber"
                         name="mobileNumber"
-                        placeholder="Enter your mobile number"
+                        placeholder="Mobile Number"
                         value={formData.mobileNumber}
                         onChange={handleChange}
-                        style={{ display: 'block', width: '100%', margin: '8px 0' }}
                     />
-                </div>
-                
-                {/*BirthDate field*/}
-                <div style={{ marginBottom: '30px' }}>
-                    <label htmlFor="birthDate">Birth Date</label>
-                    <input
+                    <Input
                         type="date"
-                        id="birthDate"
                         name="birthDate"
                         value={formData.birthDate}
                         onChange={handleChange}
-                        style={{ display: 'block', width: '100%', margin: '8px 0' }}
                     />
-                    {ageError && <p style={{ color: 'red' }}>{ageError}</p>}
-                </div>
-
-                {/*Password Field*/}
-                <div style={{ marginBottom: '30px' }}>
-                    <label htmlFor="password">Password</label>
-                    <input
+                    {ageError && <Text color="red.500">{ageError}</Text>}
+                    <Input
                         type="password"
-                        id="password"
                         name="password"
-                        placeholder="Enter your password"
+                        placeholder="Password"
                         value={formData.password}
                         onChange={handleChange}
-                        style={{ display: 'block', width: '100%', margin: '8px 0' }}
                     />
-                </div>
-
-                {/* Password Confirmation Field */}
-                <div style={{ marginBottom: '30px' }}>
-                    <label htmlFor="confirmPassword">Confirm Password</label>
-                    <input
+                    <Input
                         type="password"
-                        id="confirmPassword"
                         name="confirmPassword"
-                        placeholder="Confirm your password"
+                        placeholder="Confirm Password"
                         value={formData.confirmPassword}
                         onChange={handleChange}
-                        style={{ display: 'block', width: '100%', margin: '10px 0' }}
                     />
-                    {passwordError && <p style={{ color: 'red' }}>{passwordError}</p>}
-                </div>
-
-
-                {/* Role Dropdown */}
-                <div style={{ marginBottom: '30px' }}>
-                    <label htmlFor="role" style={{ fontWeight: 'bold', display: 'block' }}>
-                        Role
-                    </label>
-                    <select
-                        id="role"
-                        name="role"
-                        value={formData.role}
-                        onChange={handleChange}
-                        style={{
-                            display: 'block',
-                            width: '100%',
-                            padding: '10px',
-                            marginTop: '5px',
-                            borderRadius: '4px',
-                            border: '1px solid #ccc',
-                            backgroundColor: '#fff',
-                        }}
-                    >
-                        <option value="">Select a role</option>
+                    {passwordError && <Text color="red.500">{passwordError}</Text>}
+                    <Select name="role" value={formData.role} onChange={handleChange} placeholder="Select Role">
                         <option value="community-leader">Community Leader</option>
                         <option value="community-member">Community Member</option>
                         <option value="operation-team">Operation Team</option>
-                    </select>
-                </div>
-
-                {/*TnC checkbox */}
-                <div>
-                    <input
-                        type="checkbox"
-                        id="terms"
-                        name="terms"
-                        onChange={(e) =>
-                            setFormData({ ...formData, termsAccepted: e.target.checked })
-                        }
-                    />
-                    <label htmlFor="terms">
+                    </Select>
+                    <Checkbox
+                        isChecked={formData.termsAccepted}
+                        onChange={(e) => setFormData({ ...formData, termsAccepted: e.target.checked })}
+                    >
                         I agree to the <a href="/terms">Terms and Conditions</a>.
-                    </label>
-                </div>
-
-
-                {/* Submit Button */}
-                <button
-                    type="submit"
-                    style={{
-                        width: '100%',
-                        padding: '10px',
-                        backgroundColor: '#007BFF',
-                        color: '#fff',
-                        borderRadius: '4px',
-                        border: 'none',
-                        fontWeight: 'bold',
-                        cursor: 'pointer',
-                        textTransform: 'uppercase',
-                    }}
-                >
-                    Register
-                </button>
+                    </Checkbox>
+                    <Button
+                        type="submit"
+                        colorScheme="blue"
+                        width="full"
+                        isLoading={isLoading}
+                        spinner={<Spinner />}
+                    >
+                        Register
+                    </Button>
+                </VStack>
             </form>
-        </div>
+        </Box>
     );
 };
 
