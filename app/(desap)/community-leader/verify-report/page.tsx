@@ -168,7 +168,7 @@ const VerifyReport: React.FC = () => {
             <Box textAlign="center" mt={6}>
                 <Button
                     as="a"
-                    href="/community-leader"
+                    href="/dashboard/community-leader"
                     colorScheme="gray"
                     rounded="full"
                     px={6}
