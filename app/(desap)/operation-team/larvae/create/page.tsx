@@ -1,6 +1,6 @@
 "use client";
 
-import { Box, Heading, Text, VStack, Button, FormControl, FormLabel, Input, useToast } from "@chakra-ui/react";
+import { Box, Heading, Text, VStack, Button, FormControl, FormLabel, Input, Textarea, useToast } from "@chakra-ui/react";
 import { useState } from "react";
 
 export default function CreateLarvaeRecord() {
@@ -8,11 +8,12 @@ export default function CreateLarvaeRecord() {
         location: "",
         date: "",
         larvaeCount: "",
+        notes: "",
     });
     const [isLoading, setIsLoading] = useState(false);
     const toast = useToast();
 
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         const { name, value } = e.target;
         setFormData({ ...formData, [name]: value });
     };
@@ -20,7 +21,7 @@ export default function CreateLarvaeRecord() {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
-        if (!formData.location || !formData.date || !formData.larvaeCount) {
+        if (!formData.location || !formData.date || !formData.larvaeCount || !formData.notes) {
             toast({ title: "All fields are required.", status: "error", duration: 3000 });
             return;
         }
@@ -36,7 +37,7 @@ export default function CreateLarvaeRecord() {
 
             if (response.ok) {
                 toast({ title: "Larvae calculation record created successfully!", status: "success", duration: 3000 });
-                setFormData({ location: "", date: "", larvaeCount: "" });
+                setFormData({ location: "", date: "", larvaeCount: "", notes: "" });
             } else {
                 toast({ title: "Failed to create record.", status: "error", duration: 3000 });
             }
@@ -87,6 +88,16 @@ export default function CreateLarvaeRecord() {
                             name="larvaeCount"
                             placeholder="Enter larvae count"
                             value={formData.larvaeCount}
+                            onChange={handleChange}
+                        />
+                    </FormControl>
+
+                    <FormControl isRequired>
+                        <FormLabel>Notes</FormLabel>
+                        <Textarea
+                            name="notes"
+                            placeholder="Enter any notes"
+                            value={formData.notes}
                             onChange={handleChange}
                         />
                     </FormControl>

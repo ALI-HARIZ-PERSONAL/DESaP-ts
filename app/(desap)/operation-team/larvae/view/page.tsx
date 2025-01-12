@@ -1,33 +1,52 @@
 "use client";
 
-import { Box, Table, Thead, Tbody, Tr, Th, Td, Text, Spinner, Alert, AlertIcon, VStack, Button } from "@chakra-ui/react";
+import { Box, Table, Thead, Tbody, Tr, Th, Td, Text, Spinner, Alert, AlertIcon, VStack, Button, useToast } from "@chakra-ui/react";
 import { useEffect, useState } from "react";
 
 export default function ViewLarvaeRecords() {
     const [records, setRecords] = useState<any[]>([]);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const toast = useToast();
+
+    const fetchRecords = async () => {
+        setIsLoading(true);
+        setError(null); // Reset error on new fetch
+        try {
+            const response = await fetch("/api/operation-team/larvae/view");
+            if (response.ok) {
+                const data = await response.json();
+                setRecords(data.records);
+            } else {
+                setError("Failed to fetch records. Please try again later.");
+            }
+        } catch (error) {
+            console.error("Error fetching records:", error);
+            setError("An unexpected error occurred.");
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    const handleDelete = async (id: number) => {
+        try {
+            const response = await fetch(`/api/operation-team/larvae/delete/${id}`, {
+                method: "DELETE",
+            });
+
+            if (response.ok) {
+                toast({ title: "Record deleted successfully.", status: "success" });
+                fetchRecords(); // Refresh the records list
+            } else {
+                toast({ title: "Failed to delete record.", status: "error" });
+            }
+        } catch (error) {
+            console.error("Error deleting record:", error);
+            toast({ title: "An unexpected error occurred.", status: "error" });
+        }
+    };
 
     useEffect(() => {
-        const fetchRecords = async () => {
-            setIsLoading(true);
-            setError(null); // Reset error on new fetch
-            try {
-                const response = await fetch("/api/operation-team/larvae/view");
-                if (response.ok) {
-                    const data = await response.json();
-                    setRecords(data.records);
-                } else {
-                    setError("Failed to fetch records. Please try again later.");
-                }
-            } catch (error) {
-                console.error("Error fetching records:", error);
-                setError("An unexpected error occurred.");
-            } finally {
-                setIsLoading(false);
-            }
-        };
-
         fetchRecords();
     }, []);
 
@@ -55,6 +74,7 @@ export default function ViewLarvaeRecords() {
                             <Th>Larvae Count</Th>
                             <Th>Notes</Th>
                             <Th>Date</Th>
+                            <Th>Action</Th>
                         </Tr>
                     </Thead>
                     <Tbody>
@@ -65,6 +85,15 @@ export default function ViewLarvaeRecords() {
                                 <Td>{record.larvaeCount}</Td>
                                 <Td>{record.notes}</Td>
                                 <Td>{new Date(record.date).toLocaleDateString()}</Td>
+                                <Td>
+                                    <Button
+                                        colorScheme="red"
+                                        size="sm"
+                                        onClick={() => handleDelete(record.id)}
+                                    >
+                                        Delete
+                                    </Button>
+                                </Td>
                             </Tr>
                         ))}
                     </Tbody>
