@@ -69,18 +69,7 @@ export default function OperationTeamDashboard() {
                         View Larvae Calculation Records
                     </Button>
 
-                    {/* Mosquito Eggs Calculation */}
-                    <Button
-                        as={"a"}
-                        href="/operation-team/mosquito-eggs/calculate"
-                        colorScheme={"green"}
-                        bg={"green.500"}
-                        rounded={"full"}
-                        px={6}
-                        size={"lg"}
-                    >
-                        Make Mosquito Eggs Calculation
-                    </Button>
+
                 </VStack>
             </Container>
         </Box>

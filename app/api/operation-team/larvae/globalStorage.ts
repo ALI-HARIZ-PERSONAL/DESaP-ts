@@ -1,2 +1,15 @@
-// Global in-memory storage for larvae records
-export const larvaeRecords: { id: number; location: string; date: string; larvaeCount: number; notes: string }[] = [];
+import { MongoClient } from "mongodb";
+
+const uri = process.env.MONGODB_URI as string;
+const client = new MongoClient(uri);
+
+// Maintain a connected state
+let isConnected = false;
+
+export async function getDatabase() {
+  if (!isConnected) {
+    await client.connect();
+    isConnected = true;
+  }
+  return client.db("DESaPDB"); // Replace with your database name
+}
