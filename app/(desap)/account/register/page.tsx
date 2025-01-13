@@ -101,18 +101,8 @@ const RegistrationPage = () => {
                 return;
             }
 
-            alert('Registration successful!');
-            switch (formData.role) {
-                case 'community-leader':
-                    router.push('/dashboard/community-leader');
-                    break;
-                case 'operation-team':
-                    router.push('/dashboard/operation-team');
-                    break;
-                case 'community-member':
-                    router.push('/dashboard/community-member');
-                    break;
-            }
+            alert('Registration successful! You will be redirected to the login page.');
+            router.push('/account/login'); // Redirect to login page after successful registration
         } catch (error) {
             setFormError('Something went wrong. Please try again.');
         } finally {

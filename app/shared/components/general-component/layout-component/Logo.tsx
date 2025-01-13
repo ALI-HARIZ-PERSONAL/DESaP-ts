@@ -9,7 +9,7 @@ export default function Logo (props: any) {
 	const { data: session } = useSession();
 	return (
 		<Flex alignItems='center'>
-			<Link as={NextLink} href={session === null ? "/" : "/landing"}>
+			<Link as={NextLink} href={session === null ? "/" : "page.tsx"}>
 				<Image
 					priority
 					src={DESAPLogo}

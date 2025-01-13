@@ -29,7 +29,7 @@ export async function POST(request: Request) {
       return NextResponse.json({
           message: 'Login successful',
           userId: user._id,
-          username: user.username,
+          userName: user.username,
           role: user.role,
       });
   } catch (error: unknown) {

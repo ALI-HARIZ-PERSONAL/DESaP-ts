@@ -1,11 +1,8 @@
 "use client";
-import { useUser } from "@/shared/providers/userProvider";
+
+import { useEffect, useState } from "react";
 import {
-	Accordion,
-	Avatar,
-	Box,
 	Button,
-	Center,
 	Drawer,
 	DrawerBody,
 	DrawerCloseButton,
@@ -16,105 +13,117 @@ import {
 	Stack,
 	Text,
 	useDisclosure,
+	Avatar,
+	Center,
+	Accordion,
 } from "@chakra-ui/react";
-import { Role } from "@prisma/client";
-import { signOut, useSession } from "next-auth/react";
-import { CgProfile } from "react-icons/cg";
-import LoadingComponent from "../../loading";
-import GeneralSidebarContent from "../sidebar-component/General";
-import CommunityToolsSidebarContent from "../sidebar-component/community/CommunityTool";
-import CouncilLeaderSidebarContent from "../sidebar-component/community/CouncilLeader";
-import CouncilMemberSidebarContent from "../sidebar-component/community/CouncilMember";
-import OperationTeamSidebarContent from "../sidebar-component/ento/OperationTeam";
 
 export default function UserAccountNav() {
-	const { data: session } = useSession();
-	const { userData, isLoadingUserResponse, isValidatingUserResponse } =
-		useUser();
+	const [userData, setUserData] = useState<any>(null);
+	const [isMounted, setIsMounted] = useState(false); // Handle Next.js hydration
 	const { isOpen, onOpen, onClose } = useDisclosure();
-	
-	if (session === null) {
+
+	// Ensure client-side rendering is complete
+	useEffect(() => {
+		setIsMounted(true);
+	}, []);
+
+	// Load session data from localStorage on mount and updates
+	useEffect(() => {
+		const loadUserData = () => {
+			const storedUserData = localStorage.getItem("userData");
+			console.log("Stored userData in Sidebar:", storedUserData); // Debug log
+			setUserData(storedUserData ? JSON.parse(storedUserData) : null);
+		};
+
+		loadUserData();
+
+		// Listen for changes to localStorage
+		window.addEventListener("storage", loadUserData);
+
+		return () => {
+			window.removeEventListener("storage", loadUserData);
+		};
+	}, []);
+
+	const handleLogout = () => {
+		// Clear session data
+		localStorage.removeItem("userData");
+		setUserData(null);
+
+		// Redirect to login page
+		window.location.href = "/account/login";
+	};
+
+	// Check if userData is valid
+	const isLoggedIn = userData && userData.userName && userData.role;
+
+	console.log("Is Logged In:", isLoggedIn); // Debug log
+	console.log("Current User Data:", userData); // Debug log
+
+	if (!isMounted) {
+		return null; // Prevent rendering until client-side hydration
+	}
+
+	if (!isLoggedIn) {
 		return (
 			<Button
-				as={"a"}
-				fontSize={"sm"}
-				fontWeight={400}
-				variant={"solid"}
-				href={"/account/login"}
-				bg={"brand.acceptbutton"}
-				colorScheme={"green"}
+				as="a"
+				href="/account/login"
+				bg="brand.acceptbutton"
+				colorScheme="green"
 			>
 				Login
 			</Button>
 		);
 	}
 
-	return isLoadingUserResponse || isValidatingUserResponse ? (
-		<Box width={"auto"} height={"auto"}>
-			<LoadingComponent text='' />
-		</Box>
-	) : (
+	return (
 		<>
 			<Button
-				colorScheme={"green"}
-				bg={"brand.acceptbutton"}
+				colorScheme="green"
+				bg="brand.acceptbutton"
 				onClick={onOpen}
 			>
-				<CgProfile size={"1.2rem"} />
+				Profile
 			</Button>
 
-			<Drawer isOpen={isOpen} placement='right' onClose={onClose}>
+			{/* Debugging Button */}
+			<Button
+				onClick={() => {
+					const storedUserData = localStorage.getItem("userData");
+					console.log("Manual Load UserData:", storedUserData); // Debugging log
+					setUserData(storedUserData ? JSON.parse(storedUserData) : null);
+				}}
+				mt={4}
+			>
+				Debug UserData
+			</Button>
+
+			<Drawer isOpen={isOpen} placement="right" onClose={onClose}>
 				<DrawerOverlay />
 				<DrawerContent>
 					<DrawerCloseButton />
 					<DrawerHeader>
-						<Center display={"flex"} flexDirection={"column"}>
-							<Avatar bg='brand.acceptbutton' size='xl' />
-							<Text fontSize={"large"}>Welcome, </Text>
-							<Text fontWeight={"bold"} fontSize={"large"}>
-								{userData.userName}
-							</Text>
+						<Center flexDirection="column">
+							<Avatar bg="brand.acceptbutton" size="xl" />
+							<Text>Welcome,</Text>
+							<Text fontWeight="bold">{userData.userName}</Text>
 						</Center>
 					</DrawerHeader>
 					<DrawerBody>
-						<Stack direction='column'>
+						<Stack>
 							<Accordion allowMultiple>
-								<GeneralSidebarContent />
-
-								{userData.role === Role.COMMUNITY_LEADER && (
-									<CommunityToolsSidebarContent />
-								)}
-								{userData.role === Role.COMMUNITY_MEMBER && (
-									<CommunityToolsSidebarContent />
-								)}
-
-								{userData.role === Role.COMMUNITY_LEADER && (
-									<CouncilLeaderSidebarContent />
-								)}
-
-								{userData.role === Role.COMMUNITY_MEMBER && (
-									<CouncilMemberSidebarContent />
-								)}
-
-								{userData.role === Role.OPERATION_TEAM && (
-									<OperationTeamSidebarContent />
-								)}
+								{/* Add your sidebar content here */}
+								<Text>Your Role: {userData.role}</Text>
 							</Accordion>
 						</Stack>
 					</DrawerBody>
 					<DrawerFooter>
 						<Button
-							fontSize={"sm"}
-							fontWeight={400}
-							variant='solid'
-							colorScheme={"red"}
-							bg={"brand.rejectbutton"}
-							onClick={() => {
-								localStorage.removeItem("userData");
-								signOut({
-									callbackUrl: "/login",
-								});
-							}}
+							colorScheme="red"
+							bg="brand.rejectbutton"
+							onClick={handleLogout}
 						>
 							Logout
 						</Button>

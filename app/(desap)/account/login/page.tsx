@@ -2,7 +2,19 @@
 
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Box, Button, FormControl, FormLabel, Input, Stack, Heading, Text, Container, Alert, AlertIcon } from '@chakra-ui/react';
+import {
+    Box,
+    Button,
+    FormControl,
+    FormLabel,
+    Input,
+    Stack,
+    Heading,
+    Text,
+    Container,
+    Alert,
+    AlertIcon,
+} from '@chakra-ui/react';
 
 const LoginPage = () => {
     const [formData, setFormData] = useState({
@@ -44,22 +56,48 @@ const LoginPage = () => {
                 return;
             }
 
-            if (!data.role) {
-                setError('Login failed. User role not found.');
+            // Log the returned data for debugging
+            console.log('Login Response Data:', data);
+
+            // Validate required fields
+            if (!data.role || !data.userName) {
+                console.error('Missing required data:', data);
+                setError('Login failed. Missing role or username.');
                 setIsLoading(false);
                 return;
             }
 
+            // Store session data in localStorage
+            localStorage.setItem(
+                'userData',
+                JSON.stringify({
+                    userName: data.userName,
+                    role: data.role,
+                    email: data.email || '',
+                })
+            );
+
+            console.log('Session successfully stored:', {
+                userName: data.userName,
+                role: data.role,
+                email: data.email || '',
+            });
+
             // Redirect based on role
-            if (data.role === 'community-leader') {
-                router.push('/dashboard/community-leader');
-            } else if (data.role === 'community-member') {
-                router.push('/dashboard/community-member');
-            } else if (data.role === 'operation-team') {
-                router.push('/dashboard/operation-team');
-            } else {
-                setError('Unknown user role. Please contact support.');
-                setIsLoading(false);
+            switch (data.role) {
+                case 'community-leader':
+                    router.push('/dashboard/community-leader');
+                    break;
+                case 'community-member':
+                    router.push('/dashboard/community-member');
+                    break;
+                case 'operation-team':
+                    router.push('/dashboard/operation-team');
+                    break;
+                default:
+                    setError('Unknown user role. Please contact support.');
+                    setIsLoading(false);
+                    break;
             }
         } catch (err) {
             console.error('Login error:', err);
