@@ -101,6 +101,21 @@ export default function QuestionPage() {
         }
     };
 
+    const handleSearchUser = async () => {
+        try {
+            const res = await fetch(`/api/account/search-memberToDelete?query=${encodeURIComponent(searchTerm)}`)
+            if (res.ok) {
+                const data = await res.json();
+                setSearchResults(data.members);
+                setSelectedUserId(null);
+            } else {
+                alert("Error fetching accounts. Please try again.");
+            } 
+        } catch (error) {
+            console.error("Error during search:", error);
+        }
+    }
+
     const handleChange = (questionIndex: number, optionIndex: number, isChecked: boolean) => {
         setResponses((prevResponses) => {
             // Determine if the question allows multiple answers
@@ -162,7 +177,7 @@ export default function QuestionPage() {
 
       const handleSubmit = async () => {
         // Ensure user is logged in (authenticatedUser should be set)
-        if (!authenticatedUser) {
+        if (!selectedUserId) {
             alert("Please log in to submit the report.");
             return;
         }
@@ -201,7 +216,7 @@ export default function QuestionPage() {
     
             // Create the payload with user info and location data
             const payload = {
-                userId: authenticatedUser.username, // Use authenticatedUser directly
+                userId: selectedUserId, // Use authenticatedUser directly
                 reportedDate: new Date().toISOString(),
                 responses: responseData,
                 totalScore,
@@ -217,8 +232,7 @@ export default function QuestionPage() {
     
             if (res.ok) {
                 alert("Thank you for submitting your responses!");
-                // Redirect to the dashboard after successful submission
-                router.push("/dashboard/community-member");
+                setSubmitted(true);
             } else {
                 alert("Failed to submit. Please try again.");
             }
@@ -271,34 +285,89 @@ export default function QuestionPage() {
             {!submitted ? (
                 <VStack spacing={8}>
                     <Box w="full">
-    {questions.map((q, index) => (
-        <Box key={index} borderWidth={1} borderRadius="md" p={5} w="full">
-            <Text mb={3} fontWeight="bold">
-                {highlightText(q.question)}
-            </Text>
-            <VStack spacing={2} align="start">
-                {q.options.map((option, i) => (
-                    <Checkbox
-                        key={i}
-                        onChange={(e) => handleChange(index, i, e.target.checked)}
-                        isChecked={
-                            Array.isArray(responses[index])
-                                ? (responses[index] as number[]).includes(i)
-                                : responses[index] === i
-                        }
-                        isDisabled={
-                            index !== 7 &&
-                            responses[index] !== undefined &&
-                            responses[index] !== i
-                        }
-                    >
-                        {option}
-                    </Checkbox>
-                ))}
-            </VStack>
-        </Box>
-    ))}
-</Box>
+                        <Text mb={3} fontWeight="bold">
+                            Search your account:
+                        </Text>
+                        <Stack direction="row" spacing={4}>
+                            <Input
+                                placeholder="Enter your name or email..."
+                                value={searchTerm}
+                                onChange={(e) => setSearchTerm(e.target.value)}
+                            />
+                            <Button colorScheme="blue" onClick={handleSearchUser}>
+                                Search
+                            </Button>
+                        </Stack>
+                        {searchResults.length > 0 && (
+                            <List spacing={2} mt={4}>
+                                {searchResults.map((member) => (
+                                    <ListItem
+                                        key={member._id}
+                                        cursor="pointer"
+                                        p={3}
+                                        borderRadius="md"
+                                        bg={selectedUserId === member._id ? "teal.200" : "gray.100"}
+                                        onClick={() => setSelectedUserId(member._id)} // Select this user only    
+                                    >
+                                        <Box>
+                                            <Text fontWeight="bold">{member.username}</Text>
+                                            <Text fontSize="sm">{member.email}</Text>
+                                        </Box>
+                                    </ListItem>
+                                ))}
+                            </List>
+                        )}
+                        {selectedUserId && !isPinValid && (
+                            <Box mt={4}>
+                                <Text>Enter Password for selected user:</Text>
+                                <Input
+                                    type="password"
+                                    placeholder="Enter Password..."
+                                    value={pin}
+                                    onChange={(e) => setPin(e.target.value)}
+                                    mb={3}
+                                />
+                                <Button colorScheme="teal" onClick={handlePinValidation}>
+                                    Validate Password
+                                </Button>
+                            </Box>
+                        )}
+                        {isPinValid && authenticatedUser && (
+                            <Box mt={4} p={4} borderWidth={1} borderRadius="md" bg="green.100">
+                                <Text fontWeight="bold">Authenticated User:</Text>
+                                <Text>Username: {authenticatedUser.username}</Text>
+                                <Text>Role: {authenticatedUser.role}</Text>
+                            </Box>
+                        )} 
+                    </Box>                       
+                    {questions.map((q, index) => (
+                        <Box key={index} borderWidth={1} borderRadius="md" p={5} w="full">
+                            <Text mb={3} fontWeight="bold">
+                                {highlightText(q.question)}
+                            </Text>
+                            <VStack spacing={2} align="start">
+                                {q.options.map((option, i) => (
+                                    <Checkbox
+                                        key={i}
+                                        onChange={(e) => handleChange(index, i, e.target.checked)}
+                                        isChecked={
+                                            Array.isArray(responses[index])
+                                                ? (responses[index] as number[]).includes(i)
+                                                : responses[index] === i
+                                        }
+                                        isDisabled={
+                                            index !== 7 &&
+                                            responses[index] !== undefined &&
+                                            responses[index] !== i
+                                        }
+                                    >
+                                    {option}
+                                    </Checkbox>
+                                ))}
+                            </VStack>
+                        </Box>
+                    ))}
+
 
                     
                     <Box id="map" w="full" h="400px" borderRadius="md" borderWidth="1px" />
