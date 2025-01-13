@@ -1,6 +1,6 @@
 "use client";
 
-import { use, useState } from "react";
+import { useState, useEffect } from "react";
 import {
     Box,
     Button,
@@ -27,7 +27,36 @@ export default function QuestionPage() {
     const [pin, setPin] = useState("");
     const [isPinValid, setIsPinValid] = useState(false);
     const [authenticatedUser, setAuthenticatedUser] = useState<{ username: string; role: string } | null>(null);
+    const [latitude, setLatitude] = useState<number | null>(3.139); // Default: Kuala Lumpur
+    const [longitude, setLongitude] = useState<number | null>(101.6869); // Default: Kuala Lumpur
+    const [map, setMap] = useState<google.maps.Map | null>(null);
+    const [marker, setMarker] = useState<google.maps.Marker | null>(null);
+    const [confirmedLocation, setConfirmedLocation] = useState<{ lat: number; lng: number } | null>(null);
 
+    useEffect(() => {
+        if (typeof google !== "undefined") {
+          const mapInstance = new google.maps.Map(document.getElementById("map") as HTMLElement, {
+            center: { lat: 3.139, lng: 101.6869 },
+            zoom: 12,
+          });
+          setMap(mapInstance);
+    
+          const markerInstance = new google.maps.Marker({
+            position: { lat: 3.139, lng: 101.6869 },
+            map: mapInstance,
+            draggable: true,
+          });
+          setMarker(markerInstance);
+    
+          markerInstance.addListener("dragend", () => {
+            const position = markerInstance.getPosition();
+            if (position) {
+              setLatitude(position.lat());
+              setLongitude(position.lng());
+            }
+          });
+        }
+      }, []);
 
     const handleChange = (questionIndex: number, optionIndex: number, isChecked: boolean) => {
         setResponses((prev) => {
@@ -89,9 +118,48 @@ export default function QuestionPage() {
         }
     };
 
+    const handleSearchAddress = async () => {
+        try {
+          const res = await fetch(`/api/community-member/report-dengue?address=${encodeURIComponent(address)}`);
+          if (res.ok) {
+            const data = await res.json();
+            setLatitude(data.lat);
+            setLongitude(data.lng);
+    
+            if (map && marker) {
+              const newLocation = { lat: data.lat, lng: data.lng };
+              map.setCenter(newLocation);
+              marker.setPosition(newLocation);
+            }
+          } else {
+            alert("Address not found. Please try again.");
+          }
+        } catch (error) {
+          console.error("Error searching address:", error);
+        }
+    };
+
+    const handleConfirmLocation = () => {
+        if (latitude && longitude) {
+          setConfirmedLocation({ lat: latitude, lng: longitude });
+          alert("Location confirmed!");
+        } else {
+          alert("Invalid location. Please try again.");
+        }
+      };    
+
     const handleSubmit = async () => {
         if (!selectedUserId) {
             alert("Please select your account before submitting.");
+            return;
+        }
+        if (!latitude || !longitude) {
+            alert("Please provide valid latitude and longitude.");
+            return;
+        }
+        
+        if (!confirmedLocation) {
+            alert("Please confirm the location before submitting.");
             return;
         }
 
@@ -125,7 +193,8 @@ export default function QuestionPage() {
                 reportedDate: new Date().toISOString(),
                 responses: responseData,
                 totalScore,
-                address, // Include the address in the payload
+                address,
+                location: confirmedLocation,
             };
 
             // Send the data to the backend
@@ -160,6 +229,25 @@ export default function QuestionPage() {
         }
         return text;
     };
+
+    const handleAddressChange = async (address: string) => {
+        setAddress(address);
+    
+        try {
+            const res = await fetch(`/api/community-member/report-dengue?address=${encodeURIComponent(address)}`);
+            if (res.ok) {
+                const data = await res.json();
+                setLatitude(data.lat);
+                setLongitude(data.lng);
+            } else {
+                const errorData = await res.json();
+                alert(errorData.error || "Failed to get location. Please check the address.");
+            }
+        } catch (error) {
+            console.error("Error fetching location data:", error);
+        }
+    };
+    
 
     return (
         <Container maxW="3xl" py={10}>
@@ -252,15 +340,24 @@ export default function QuestionPage() {
                         </Box>
                     ))}
                     <Box w="full">
-                        <Text mb={3} fontWeight="bold">
-                            Enter your address:
+                        <Text mb={2} fontWeight="bold">
+                            Enter Address:
                         </Text>
-                        <Textarea
-                            placeholder="Your address..."
+                        <Stack direction="row" spacing={4}>
+                            <Input
+                            placeholder="Enter your address..."
                             value={address}
                             onChange={(e) => setAddress(e.target.value)}
-                        />
+                            />
+                            <Button colorScheme="blue" onClick={handleSearchAddress}>
+                            Search
+                            </Button>
+                        </Stack>
                     </Box>
+                    <Box id="map" w="full" h="400px" borderRadius="md" borderWidth="1px" />
+                    <Button colorScheme="green" onClick={handleConfirmLocation}>
+                        Confirm Location
+                    </Button>
                     <Button colorScheme="teal" onClick={handleSubmit}>
                         Submit
                     </Button>
