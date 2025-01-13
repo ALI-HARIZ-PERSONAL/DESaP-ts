@@ -12,6 +12,8 @@ import {
   Text,
   Select,
   VStack,
+  Input,
+  useToast,
 } from "@chakra-ui/react";
 import { useState } from "react";
 import { councils } from "./council"; // Import updated council data
@@ -19,6 +21,8 @@ import { councils } from "./council"; // Import updated council data
 export default function ManageCouncil() {
   const [filteredCouncils, setFilteredCouncils] = useState(councils);
   const [selectedState, setSelectedState] = useState<string>("");
+  const [councilId, setCouncilId] = useState<string>("");
+  const toast = useToast();
 
   const states = Array.from(new Set(councils.map((council) => council.state)));
 
@@ -30,8 +34,48 @@ export default function ManageCouncil() {
     }
   };
 
+  const handleJoinCouncil = async () => {
+    if (!councilId.trim()) {
+      toast({ title: "Please enter a council ID.", status: "warning" });
+      return;
+    }
+
+    try {
+      const response = await fetch("/api/council/join", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ councilId }),
+      });
+
+      if (response.ok) {
+        toast({ title: "Joined council successfully!", status: "success" });
+        setCouncilId(""); // Reset the input field
+      } else {
+        toast({ title: "Failed to join council.", status: "error" });
+      }
+    } catch (error) {
+      console.error("Error joining council:", error);
+      toast({ title: "An error occurred while joining council.", status: "error" });
+    }
+  };
+
   return (
     <Box maxW="6xl" mx="auto" py={10}>
+      {/* "Join a Council" Section */}
+      <VStack mb={6} spacing={4}>
+        <Text fontSize="lg" fontWeight="bold">
+          Join a Council
+        </Text>
+        <Input
+          placeholder="Enter Council ID"
+          value={councilId}
+          onChange={(e) => setCouncilId(e.target.value)}
+        />
+        <Button colorScheme="teal" onClick={handleJoinCouncil}>
+          Join
+        </Button>
+      </VStack>
+
       {/* Dropdown to filter by state */}
       <VStack mb={6} spacing={4}>
         <Text fontSize="lg" fontWeight="bold">
