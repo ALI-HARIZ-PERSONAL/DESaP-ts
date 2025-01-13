@@ -1,185 +1,132 @@
 "use client";
 
 import {
-    Box,
-    Button,
-    Input,
-    Table,
-    Thead,
-    Tbody,
-    Tr,
-    Th,
-    Td,
-    Text,
-    Modal,
-    ModalOverlay,
-    ModalContent,
-    ModalHeader,
-    ModalCloseButton,
-    ModalBody,
-    ModalFooter,
-    useDisclosure,
-    VStack,
-    useToast,
-    Spinner,
+  Box,
+  Button,
+  Input,
+  Table,
+  Thead,
+  Tbody,
+  Tr,
+  Th,
+  Td,
+  Text,
+  Spinner,
+  VStack,
+  useToast,
 } from "@chakra-ui/react";
 import { useState, useEffect } from "react";
 
-interface CouncilMember {
-    id: string;
-    name: string;
-    email: string;
-    role: string;
+interface Council {
+  id: string;
+  name: string;
+  city: string;
+  state: string;
+  address: string;
+  leaderEmail?: string;
 }
 
 export default function ManageCouncil() {
-    const [councilMembers, setCouncilMembers] = useState<CouncilMember[]>([]);
-    const [newMemberEmail, setNewMemberEmail] = useState<string>("");
-    const [isLoading, setIsLoading] = useState<boolean>(false);
-    const { isOpen, onOpen, onClose } = useDisclosure();
-    const toast = useToast();
+  const [councils, setCouncils] = useState<Council[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [councilId, setCouncilId] = useState<string>("");
+  const toast = useToast();
 
-    // Fetch council members
-    useEffect(() => {
-        fetchCouncilMembers();
-    }, []);
-
-    const fetchCouncilMembers = async () => {
-        setIsLoading(true);
-        try {
-            const response = await fetch("/api/council/members");
-            if (response.ok) {
-                const data = await response.json();
-                setCouncilMembers(data.members);
-            } else {
-                toast({ title: "Failed to fetch members.", status: "error" });
-            }
-        } catch (error) {
-            console.error("Error fetching members:", error);
-            toast({ title: "An error occurred while fetching members.", status: "error" });
-        } finally {
-            setIsLoading(false);
-        }
+  // Fetch councils
+  useEffect(() => {
+    const fetchCouncils = async () => {
+      setIsLoading(true);
+      try {
+        const response = await fetch("/api/council/readAll");
+        const data = await response.json();
+  
+        console.log("Frontend Fetched Councils:", data); // Debug log
+        setCouncils(data.data || []); // Adjusted to match API response structure
+      } catch (error) {
+        console.error("Error fetching councils:", error);
+        toast({ title: "An error occurred while fetching councils.", status: "error" });
+      } finally {
+        setIsLoading(false);
+      }
     };
+  
+    fetchCouncils();
+  }, [toast]);
+  
+  const handleJoinCouncil = async () => {
+    if (!councilId.trim()) {
+      toast({ title: "Please enter a council ID.", status: "warning" });
+      return;
+    }
 
-    const handleAddMember = async () => {
-        if (!newMemberEmail.trim()) {
-            toast({ title: "Email is required.", status: "warning" });
-            return;
-        }
+    try {
+      const response = await fetch("/api/council/join", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ councilId }),
+      });
 
-        try {
-            const response = await fetch("/api/council/add-member", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ email: newMemberEmail }),
-            });
+      if (response.ok) {
+        toast({ title: "Joined council successfully!", status: "success" });
+      } else {
+        toast({ title: "Failed to join council.", status: "error" });
+      }
+    } catch (error) {
+      console.error("Error joining council:", error);
+      toast({ title: "An error occurred while joining council.", status: "error" });
+    }
+  };
 
-            if (response.ok) {
-                toast({ title: "Member added successfully.", status: "success" });
-                fetchCouncilMembers();
-                setNewMemberEmail("");
-                onClose();
-            } else {
-                toast({ title: "Failed to add member.", status: "error" });
-            }
-        } catch (error) {
-            console.error("Error adding member:", error);
-            toast({ title: "An error occurred while adding member.", status: "error" });
-        }
-    };
+  return (
+    <Box maxW="6xl" mx="auto" py={10}>
+      <Text fontSize="2xl" fontWeight="bold" mb={6}>
+        Available Councils
+      </Text>
 
-    const handleRemoveMember = async (memberId: string) => {
-        try {
-            const response = await fetch(`/api/council/remove-member/${memberId}`, {
-                method: "DELETE",
-            });
+      {isLoading ? (
+        <Spinner size="lg" />
+      ) : councils.length > 0 ? (
+        <Table variant="striped" colorScheme="teal">
+          <Thead>
+            <Tr>
+              <Th>ID</Th>
+              <Th>Name</Th>
+              <Th>City</Th>
+              <Th>State</Th>
+              <Th>Address</Th>
+              <Th>Leader Email</Th>
+            </Tr>
+          </Thead>
+          <Tbody>
+            {councils.map((council) => (
+              <Tr key={council.id}>
+                <Td>{council.id}</Td>
+                <Td>{council.name}</Td>
+                <Td>{council.city}</Td>
+                <Td>{council.state}</Td>
+                <Td>{council.address}</Td>
+                <Td>{council.leaderEmail || "N/A"}</Td>
+              </Tr>
+            ))}
+          </Tbody>
+        </Table>
+      ) : (
+        <Text>No councils available.</Text>
+      )}
 
-            if (response.ok) {
-                toast({ title: "Member removed successfully.", status: "success" });
-                fetchCouncilMembers();
-            } else {
-                toast({ title: "Failed to remove member.", status: "error" });
-            }
-        } catch (error) {
-            console.error("Error removing member:", error);
-            toast({ title: "An error occurred while removing member.", status: "error" });
-        }
-    };
-
-    return (
-        <Box maxW="6xl" mx="auto" py={10} px={6}>
-            <Text fontSize="2xl" fontWeight="bold" mb={6}>
-                Manage Council Members
-            </Text>
-
-            {/* Add Member Button */}
-            <Button colorScheme="teal" onClick={onOpen} mb={6}>
-                Add Member
-            </Button>
-
-            {/* Council Members Table */}
-            {isLoading ? (
-                <Box textAlign="center">
-                    <Spinner size="lg" />
-                </Box>
-            ) : (
-                <Table variant="striped" colorScheme="teal">
-                    <Thead>
-                        <Tr>
-                            <Th>Name</Th>
-                            <Th>Email</Th>
-                            <Th>Role</Th>
-                            <Th>Action</Th>
-                        </Tr>
-                    </Thead>
-                    <Tbody>
-                        {councilMembers.map((member) => (
-                            <Tr key={member.id}>
-                                <Td>{member.name}</Td>
-                                <Td>{member.email}</Td>
-                                <Td>{member.role}</Td>
-                                <Td>
-                                    <Button
-                                        colorScheme="red"
-                                        size="sm"
-                                        onClick={() => handleRemoveMember(member.id)}
-                                    >
-                                        Remove
-                                    </Button>
-                                </Td>
-                            </Tr>
-                        ))}
-                    </Tbody>
-                </Table>
-            )}
-
-            {/* Add Member Modal */}
-            <Modal isOpen={isOpen} onClose={onClose}>
-                <ModalOverlay />
-                <ModalContent>
-                    <ModalHeader>Add Council Member</ModalHeader>
-                    <ModalCloseButton />
-                    <ModalBody>
-                        <VStack spacing={4}>
-                            <Text>Enter the email of the member to add:</Text>
-                            <Input
-                                placeholder="Member Email"
-                                value={newMemberEmail}
-                                onChange={(e) => setNewMemberEmail(e.target.value)}
-                            />
-                        </VStack>
-                    </ModalBody>
-                    <ModalFooter>
-                        <Button colorScheme="teal" onClick={handleAddMember}>
-                            Add
-                        </Button>
-                        <Button variant="ghost" onClick={onClose} ml={3}>
-                            Cancel
-                        </Button>
-                    </ModalFooter>
-                </ModalContent>
-            </Modal>
-        </Box>
-    );
+      <VStack mt={8} spacing={4}>
+        <Text fontSize="lg" fontWeight="bold">
+          Join a Council
+        </Text>
+        <Input
+          placeholder="Enter Council ID"
+          value={councilId}
+          onChange={(e) => setCouncilId(e.target.value)}
+        />
+        <Button colorScheme="teal" onClick={handleJoinCouncil}>
+          Join
+        </Button>
+      </VStack>
+    </Box>
+  );
 }
