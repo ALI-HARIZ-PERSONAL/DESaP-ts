@@ -1,3 +1,5 @@
+
+
 import { NextResponse } from "next/server";
 import { larvaeRecords } from "../../globalStorage";
 
@@ -17,3 +19,4 @@ export async function DELETE(req: Request, { params }: { params: { id: string } 
         return NextResponse.json({ message: "Failed to delete record." }, { status: 500 });
     }
 }
+
