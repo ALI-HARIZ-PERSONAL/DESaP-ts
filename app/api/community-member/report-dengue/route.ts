@@ -42,8 +42,9 @@ export async function GET(req: Request) {
     }
 }
 
-export async function GET() {
+export async function POST(request: Request) {
   try {
+    const body = await request.json();
     const councils = await db.collection("councils").find().toArray();
 
         // Destructure the request payload
@@ -88,13 +89,4 @@ export async function GET() {
         });
     }
 
-    return NextResponse.json({
-      data: councils,
-      message: "Councils retrieved successfully",
-      status: 200,
-    });
-  } catch (error) {
-    console.error("Error fetching councils:", error); // Debug log
-    return NextResponse.json({ error: "Failed to fetch councils" }, { status: 500 });
-  }
 }
