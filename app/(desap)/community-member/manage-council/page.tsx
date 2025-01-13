@@ -44,14 +44,19 @@ export default function ManageCouncil() {
       const response = await fetch("/api/council/join", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ councilId }),
+        body: JSON.stringify({
+          councilId, // This should match the `id` field in your councils collection
+          userId: "6784d5c0b92934d49ac19309", // Replace with the actual user ID from your session
+        }),
       });
 
       if (response.ok) {
-        toast({ title: "Joined council successfully!", status: "success" });
+        const result = await response.json();
+        toast({ title: result.message || "Joined council successfully!", status: "success" });
         setCouncilId(""); // Reset the input field
       } else {
-        toast({ title: "Failed to join council.", status: "error" });
+        const errorData = await response.json();
+        toast({ title: errorData.error || "Failed to join council.", status: "error" });
       }
     } catch (error) {
       console.error("Error joining council:", error);
