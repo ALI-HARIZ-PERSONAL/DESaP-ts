@@ -16,7 +16,7 @@ export async function POST(request: Request) {
       role,
       mobileNumber,
       birthDate,
-      profilePicture,
+      councilId,
       termsAccepted,
     } = body;
 
@@ -66,7 +66,7 @@ export async function POST(request: Request) {
       role,
       mobileNumber: mobileNumber || null,
       birthDate: birthDate || null,
-      profilePicture: profilePicture || defaultProfilePicture,
+      councilId: null,
       createdAt: new Date(),
     };
 
