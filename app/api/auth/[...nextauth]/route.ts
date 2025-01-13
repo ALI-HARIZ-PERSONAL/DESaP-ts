@@ -4,7 +4,7 @@ import CredentialsProvider from "next-auth/providers/credentials";
 import db from "@/shared/providers/dbProvider"; 
 import bcrypt from "bcrypt";
 
-const authOptions: NextAuthOptions = {
+export const authOptions: NextAuthOptions = {
 	adapter: PrismaAdapter(db),
 	pages: {
 		signIn: "/login",
@@ -65,6 +65,9 @@ const authOptions: NextAuthOptions = {
 				token.username = user.username;
 				token.role = user.role;
 				token.councilId = user.councilId;
+
+				// Example: Add a mock accessToken here (you can replace it with actual token logic)
+				token.accessToken = `mock-token-for-${user.username}`;
 			}
 			return token;
 		},
@@ -75,6 +78,9 @@ const authOptions: NextAuthOptions = {
 				role: token.role,
 				councilId: token.councilId,
 			};
+
+			// Include accessToken in the session
+			session.accessToken = token.accessToken as string;
 			return session;
 		},
 	},

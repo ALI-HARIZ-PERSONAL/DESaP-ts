@@ -7,6 +7,7 @@ declare module "next-auth" {
 		role: string | unknown;
 		councilId: number | unknown;
 	}
+
 	interface Session {
 		user: User & {
 			username: string | unknown;
@@ -17,5 +18,13 @@ declare module "next-auth" {
 		token: {
 			username: string | unknown;
 		};
+		accessToken?: string; // Add accessToken to the session
+	}
+
+	interface JWT {
+		username: string | unknown;
+		accessToken?: string; // Add accessToken to the JWT
+		role: string | unknown;
+		councilId: number | unknown;
 	}
 }

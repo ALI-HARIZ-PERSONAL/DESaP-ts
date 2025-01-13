@@ -15,14 +15,21 @@ import {
   Input,
   useToast,
 } from "@chakra-ui/react";
-import { useState } from "react";
-import { councils } from "./council"; // Import updated council data
+import { useState, useEffect } from "react";
+import { councils } from "./council";
+import { useSession } from "next-auth/react";
 
 export default function ManageCouncil() {
+  const { data: session } = useSession(); // Fetch session data using next-auth
   const [filteredCouncils, setFilteredCouncils] = useState(councils);
   const [selectedState, setSelectedState] = useState<string>("");
   const [councilId, setCouncilId] = useState<string>("");
   const toast = useToast();
+
+  // Debug: Log the session
+  useEffect(() => {
+    console.log("Session:", session);
+  }, [session]);
 
   const states = Array.from(new Set(councils.map((council) => council.state)));
 
@@ -40,14 +47,22 @@ export default function ManageCouncil() {
       return;
     }
 
+    if (!session || !session.user) {
+      toast({ title: "You must be logged in to join a council.", status: "error" });
+      return;
+    }
+
+    const userId = session.user.id; // User ID from session
+    const userToken = session.accessToken; // Access token from session
+
     try {
       const response = await fetch("/api/council/join", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          councilId, // This should match the `id` field in your councils collection
-          userId: "6784d5c0b92934d49ac19309", // Replace with the actual user ID from your session
-        }),
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${userToken}`,
+        },
+        body: JSON.stringify({ councilId }),
       });
 
       if (response.ok) {
