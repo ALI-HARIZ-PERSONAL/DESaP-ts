@@ -29,23 +29,30 @@ export default function ViewLarvaeRecords() {
         }
     };
 
-    const handleDelete = async (id: number) => {
-        try {
-            const response = await fetch(`/api/operation-team/larvae/delete/${id}`, {
-                method: "DELETE",
-            });
-
-            if (response.ok) {
-                toast({ title: "Record deleted successfully.", status: "success" });
-                fetchRecords(); // Refresh the records list
-            } else {
-                toast({ title: "Failed to delete record.", status: "error" });
-            }
-        } catch (error) {
-            console.error("Error deleting record:", error);
-            toast({ title: "An unexpected error occurred.", status: "error" });
+    const handleDelete = async (id: string) => {
+        if (!id) {
+          console.error("Invalid ID passed to delete.");
+          toast({ title: "Invalid record ID.", status: "error" });
+          return;
         }
-    };
+      
+        try {
+          const response = await fetch(`/api/operation-team/larvae/delete/${id}`, {
+            method: "DELETE",
+          });
+      
+          if (response.ok) {
+            toast({ title: "Record deleted successfully.", status: "success" });
+            fetchRecords(); // Refresh the records list
+          } else {
+            toast({ title: "Failed to delete record.", status: "error" });
+          }
+        } catch (error) {
+          console.error("Error deleting record:", error);
+          toast({ title: "An unexpected error occurred.", status: "error" });
+        }
+      };
+      
 
     useEffect(() => {
         fetchRecords();
@@ -80,24 +87,25 @@ export default function ViewLarvaeRecords() {
                     </Thead>
                     <Tbody>
                         {records.map((record) => (
-                            <Tr key={record.id}>
-                                <Td>{record.id}</Td>
-                                <Td>{record.location}</Td>
-                                <Td>{record.larvaeCount}</Td>
-                                <Td>{record.notes}</Td>
-                                <Td>{new Date(record.date).toLocaleDateString()}</Td>
-                                <Td>
-                                    <Button
-                                        colorScheme="red"
-                                        size="sm"
-                                        onClick={() => handleDelete(record.id)}
-                                    >
-                                        Delete
-                                    </Button>
-                                </Td>
-                            </Tr>
+                        <Tr key={record._id}>
+                            <Td>{record._id}</Td> {/* Display _id */}
+                            <Td>{record.location}</Td>
+                            <Td>{record.larvaeCount}</Td>
+                            <Td>{record.notes}</Td>
+                            <Td>{new Date(record.date).toLocaleDateString()}</Td>
+                            <Td>
+                                <Button
+                                    colorScheme="red"
+                                    size="sm"
+                                    onClick={() => handleDelete(record._id)} // Pass the correct _id
+                                >
+                                    Delete
+                                </Button>
+                            </Td>
+                        </Tr>
                         ))}
                     </Tbody>
+
                 </Table>
             ) : (
                 <Text mt={6}>No records found.</Text>
