@@ -27,8 +27,11 @@ export async function GET(req: Request) {
         const data = await response.json();
         console.log("API Response:", data);
         if (data.status === "REQUEST_DENIED") {
-            console.error("Error: API Request Denied -", data.error_message);
-        }
+            return NextResponse.json(
+                { error: "Google Maps API request denied", details: data.error_message },
+                { status: 403 }
+            );
+        }        
 
         if (data.status === "OK" && data.results.length > 0) {
             const location = data.results[0].geometry.location;

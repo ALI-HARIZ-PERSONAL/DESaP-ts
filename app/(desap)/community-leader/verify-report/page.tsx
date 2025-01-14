@@ -19,17 +19,15 @@ import {
     ModalFooter,
     useDisclosure,
 } from "@chakra-ui/react";
-import { GoogleMap, Marker, InfoWindow, HeatmapLayer, useJsApiLoader } from "@react-google-maps/api";
+import { GoogleMap, Marker, HeatmapLayer, useJsApiLoader } from "@react-google-maps/api";
 import { useState, useEffect } from "react";
 
 interface Report {
     id: number;
-    title: string;
-    details: string;
     submittedBy: string;
     date: string;
     status: string;
-    viewed: boolean;
+    severity: string; // New severity field
     location: { lat: number; lng: number };
 }
 
@@ -37,29 +35,32 @@ const VerifyReport: React.FC = () => {
     const [reports, setReports] = useState<Report[]>([
         {
             id: 1,
-            title: "Dengue Cluster Report",
-            details: "Details about dengue cluster...",
-            submittedBy: "user1",
+            submittedBy: "ali",
             date: "2024-06-01",
             status: "Pending",
-            viewed: true,
+            severity: "High", // Example severity
             location: { lat: 3.139, lng: 101.6869 }, // Kuala Lumpur
         },
         {
             id: 2,
-            title: "Stagnant Water Report",
-            details: "Details about stagnant water...",
-            submittedBy: "user2",
+            submittedBy: "aqil",
             date: "2024-06-02",
             status: "Pending",
-            viewed: true,
+            severity: "Moderate",
             location: { lat: 1.3521, lng: 103.8198 }, // Singapore
+        },
+        {
+            id: 3,
+            submittedBy: "adam",
+            date: "2024-01-14",
+            status: "Pending",
+            severity: "Low",
+            location: { lat: 1.5553, lng: 103.641 }, // UTM Skudai
         },
     ]);
 
     const [selectedReport, setSelectedReport] = useState<Report | null>(null);
     const { isOpen, onOpen, onClose } = useDisclosure();
-    const [isInfoWindowOpen, setInfoWindowOpen] = useState(false);
     const [heatMapData, setHeatMapData] = useState<google.maps.LatLng[]>([]);
 
     const { isLoaded } = useJsApiLoader({
@@ -77,37 +78,8 @@ const VerifyReport: React.FC = () => {
         }
     }, [isLoaded, reports]);
 
-    // Define the black theme map style
-    const mapStyle = [
-        { elementType: "geometry", stylers: [{ color: "#212121" }] },
-        { elementType: "labels.icon", stylers: [{ visibility: "off" }] },
-        { elementType: "labels.text.fill", stylers: [{ color: "#757575" }] },
-        { elementType: "labels.text.stroke", stylers: [{ color: "#212121" }] },
-        {
-            featureType: "administrative",
-            elementType: "geometry",
-            stylers: [{ color: "#757575" }],
-        },
-        {
-            featureType: "landscape.man_made",
-            elementType: "geometry",
-            stylers: [{ color: "#1e1e1e" }],
-        },
-        {
-            featureType: "landscape.natural",
-            elementType: "geometry",
-            stylers: [{ color: "#2e2e2e" }],
-        },
-        {
-            featureType: "water",
-            elementType: "geometry",
-            stylers: [{ color: "#000000" }],
-        },
-    ];
-
     const handleViewReport = (report: Report) => {
         setSelectedReport(report);
-        setInfoWindowOpen(false);
         onOpen();
     };
 
@@ -128,9 +100,9 @@ const VerifyReport: React.FC = () => {
                 <Thead>
                     <Tr>
                         <Th>Report ID</Th>
-                        <Th>Title</Th>
                         <Th>Submitted By</Th>
                         <Th>Date</Th>
+                        <Th>Severity</Th> {/* New column for severity */}
                         <Th>Status</Th>
                         <Th>Action</Th>
                     </Tr>
@@ -139,9 +111,9 @@ const VerifyReport: React.FC = () => {
                     {reports.map((report) => (
                         <Tr key={report.id}>
                             <Td>{report.id}</Td>
-                            <Td>{report.title}</Td>
                             <Td>{report.submittedBy}</Td>
                             <Td>{report.date}</Td>
+                            <Td>{report.severity}</Td> {/* Show severity */}
                             <Td>{report.status}</Td>
                             <Td>
                                 <Button
@@ -185,35 +157,24 @@ const VerifyReport: React.FC = () => {
                         <ModalHeader>Report Details</ModalHeader>
                         <ModalCloseButton />
                         <ModalBody>
-                            <Text fontWeight="bold">Title:</Text>
-                            <Text mb={4}>{selectedReport.title}</Text>
-                            <Text fontWeight="bold">Details:</Text>
-                            <Text mb={4}>{selectedReport.details}</Text>
+                            <Text fontWeight="bold">Submitted By:</Text>
+                            <Text mb={2}>{selectedReport.submittedBy}</Text>
+                            <Text fontWeight="bold">Date:</Text>
+                            <Text mb={2}>{selectedReport.date}</Text>
+                            <Text fontWeight="bold">Severity:</Text>
+                            <Text mb={2}>{selectedReport.severity}</Text> {/* Show severity */}
+                            <Text fontWeight="bold">Status:</Text>
+                            <Text mb={4}>{selectedReport.status}</Text>
 
                             {/* Google Maps Section */}
                             <Box height="400px" width="100%" borderRadius="md" border="1px solid #ccc">
                                 <GoogleMap
                                     mapContainerStyle={{ width: "100%", height: "100%" }}
-                                    zoom={6} // Adjust zoom to show larger area
+                                    zoom={10} // Adjust zoom to show larger area
                                     center={selectedReport.location}
-                                    options={{ styles: mapStyle }}
                                 >
                                     {heatMapData.length > 0 && <HeatmapLayer data={heatMapData} />}
-                                    <Marker
-                                        position={selectedReport.location}
-                                        onClick={() => setInfoWindowOpen(true)}
-                                    />
-                                    {isInfoWindowOpen && (
-                                        <InfoWindow
-                                            position={selectedReport.location}
-                                            onCloseClick={() => setInfoWindowOpen(false)}
-                                        >
-                                            <Box>
-                                                <Text fontWeight="bold">{selectedReport.title}</Text>
-                                                <Text>{selectedReport.details}</Text>
-                                            </Box>
-                                        </InfoWindow>
-                                    )}
+                                    <Marker position={selectedReport.location} />
                                 </GoogleMap>
                             </Box>
                         </ModalBody>
