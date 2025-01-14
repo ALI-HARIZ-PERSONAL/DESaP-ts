@@ -1,121 +1,150 @@
 "use client";
 
-import { Box, Table, Thead, Tbody, Tr, Th, Td, Text, Spinner, Alert, AlertIcon, VStack, Button, useToast } from "@chakra-ui/react";
-import { useEffect, useState } from "react";
+import {
+  Box,
+  Button,
+  Table,
+  Thead,
+  Tbody,
+  Tr,
+  Th,
+  Td,
+  Text,
+  Select,
+  VStack,
+  Input,
+  useToast,
+} from "@chakra-ui/react";
+import { useState, useEffect } from "react";
+import { councils } from "./council";
 
-export default function ViewLarvaeRecords() {
-  const [records, setRecords] = useState<any[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+import { useSession } from "next-auth/react";
+
+export default function ManageCouncil() {
+  const { data: session } = useSession(); // Fetch session data using next-auth
+  const [filteredCouncils, setFilteredCouncils] = useState(councils);
+  const [selectedState, setSelectedState] = useState<string>("");
+  const [councilId, setCouncilId] = useState<string>("");
   const toast = useToast();
 
-  // Fetch all records from the database
-  const fetchRecords = async () => {
-    setIsLoading(true);
-    setError(null); // Reset error on new fetch
-    try {
-      const response = await fetch("/api/operation-team/larvae/view");
-      if (response.ok) {
-        const data = await response.json();
-        setRecords(data.records);
-      } else {
-        setError("Failed to fetch records. Please try again later.");
-      }
-    } catch (error) {
-      console.error("Error fetching records:", error);
-      setError("An unexpected error occurred.");
-    } finally {
-      setIsLoading(false);
+  // Debug: Log the session
+  useEffect(() => {
+    console.log("Session:", session);
+  }, [session]);
+
+  const states = Array.from(new Set(councils.map((council) => council.state)));
+
+  const filterCouncilsByState = (state: string) => {
+    if (state) {
+      setFilteredCouncils(councils.filter((council) => council.state === state));
+    } else {
+      setFilteredCouncils(councils);
     }
   };
 
-  // Handle delete operation
-  const handleDelete = async (id: string) => {
+  const handleJoinCouncil = async () => {
+    if (!councilId.trim()) {
+      toast({ title: "Please enter a council ID.", status: "warning" });
+      return;
+    }
+
+    if (!session || !session.user) {
+      toast({ title: "You must be logged in to join a council.", status: "error" });
+      return;
+    }
+
+    const userId = session.user.id; // User ID from session
+    const userToken = session.accessToken; // Access token from session
+
     try {
-      const response = await fetch(`/api/operation-team/larvae/delete/${id}`, {
-        method: "DELETE",
+      const response = await fetch("/api/council/join", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${userToken}`,
+        },
+
+        body: JSON.stringify({ councilId }),
       });
-  
+
       if (response.ok) {
-        console.log("Record deleted successfully");
+        const result = await response.json();
+        toast({ title: result.message || "Joined council successfully!", status: "success" });
+        setCouncilId(""); // Reset the input field
       } else {
-        console.error("Failed to delete record:", await response.json());
+        const errorData = await response.json();
+        toast({ title: errorData.error || "Failed to join council.", status: "error" });
       }
     } catch (error) {
-      console.error("Error:", error);
-    }
-  };  
-  
+      console.error("Error joining council:", error);
 
-  useEffect(() => {
-    fetchRecords();
-  }, []);
+      toast({ title: "An error occurred while joining council.", status: "error" });
+    }
+  };
 
   return (
     <Box maxW="6xl" mx="auto" py={10}>
-      {/* Page Header */}
-      <Text fontSize="2xl" fontWeight="bold" mb={6}>
-        Larvae Calculation Records
-      </Text>
+      {/* "Join a Council" Section */}
+      <VStack mb={6} spacing={4}>
+        <Text fontSize="lg" fontWeight="bold">
+          Join a Council
+        </Text>
+        <Input
+          placeholder="Enter Council ID"
+          value={councilId}
+          onChange={(e) => setCouncilId(e.target.value)}
+        />
+        <Button colorScheme="teal" onClick={handleJoinCouncil}>
+          Join
+        </Button>
+      </VStack>
 
-      {/* Table or Error Message */}
-      {isLoading ? (
-        <Spinner size="lg" mt={6} />
-      ) : error ? (
-        <Alert status="error" mt={6}>
-          <AlertIcon />
-          {error}
-        </Alert>
-      ) : records.length > 0 ? (
-        <Table variant="striped" colorScheme="teal" mt={6}>
+      {/* Dropdown to filter by state */}
+      <VStack mb={6} spacing={4}>
+        <Text fontSize="lg" fontWeight="bold">
+          Select a Region
+        </Text>
+        <Select
+          placeholder="All Regions"
+          value={selectedState}
+          onChange={(e) => {
+            const state = e.target.value;
+            setSelectedState(state);
+            filterCouncilsByState(state);
+          }}
+        >
+          <option value="">All Regions</option>
+          {states.map((state) => (
+            <option key={state} value={state}>
+              {state}
+            </option>
+          ))}
+        </Select>
+      </VStack>
+
+      {/* Table to display councils */}
+      {filteredCouncils.length > 0 ? (
+        <Table variant="striped" colorScheme="teal">
           <Thead>
             <Tr>
               <Th>ID</Th>
-              <Th>Location</Th>
-              <Th>Larvae Count</Th>
-              <Th>Notes</Th>
-              <Th>Date</Th>
-              <Th>Action</Th>
+              <Th>District</Th>
+              <Th>State</Th>
             </Tr>
           </Thead>
           <Tbody>
-            {records.map((record) => (
-              <Tr key={record.id}>
-                <Td>{record.id}</Td>
-                <Td>{record.location}</Td>
-                <Td>{record.larvaeCount}</Td>
-                <Td>{record.notes}</Td>
-                <Td>{new Date(record.date).toLocaleDateString()}</Td>
-                <Td>
-                  <Button
-                    colorScheme="red"
-                    size="sm"
-                    onClick={() => handleDelete(record.id)} // Pass the record ID
-                  >
-                    Delete
-                  </Button>
-                </Td>
+            {filteredCouncils.map((council) => (
+              <Tr key={council.id}>
+                <Td>{council.id}</Td>
+                <Td>{council.district}</Td>
+                <Td>{council.state}</Td>
               </Tr>
             ))}
           </Tbody>
         </Table>
       ) : (
-        <Text mt={6}>No records found.</Text>
+        <Text>No councils available for this region.</Text>
       )}
-
-      {/* Back to Dashboard Button */}
-      <VStack mt={8}>
-        <Button
-          as="a"
-          href="/dashboard/operation-team"
-          colorScheme="gray"
-          bg="gray.500"
-          rounded="full"
-          size="lg"
-        >
-          Back to Dashboard
-        </Button>
-      </VStack>
     </Box>
   );
 }
